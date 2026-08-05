@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class log_aktivitas extends Model
+class LogAktivitas extends Model
 {
     protected $table = 'log_aktivitas';
 

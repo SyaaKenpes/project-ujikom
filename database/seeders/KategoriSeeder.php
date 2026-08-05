@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\kategori;
+use App\Models\Kategori;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class Kategori extends Seeder
+class KategoriSeeder extends Seeder
 {
     /**
      * Run the database seeds.

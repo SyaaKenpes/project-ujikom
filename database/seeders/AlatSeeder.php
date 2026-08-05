@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\alat;
+use App\Models\Alat;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class alat extends Seeder
+class AlatSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -55,8 +55,8 @@ class alat extends Seeder
             ],         
         ];         
                     
-                    foreach ($alat as $item) {
-                        Alat::create($item);         
-                        } 
+        foreach ($alat as $item) {
+            Alat::create($item);         
+        } 
     }
 }
