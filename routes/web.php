@@ -1,18 +1,18 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WEB\AdminController;
 use App\Http\Controllers\WEB\PetugasController;
-use App\Http\Controllers\WEB\PeminjamanController;
+use App\Http\Controllers\WEB\PeminjamController; // <-- Udah disesuaikan jadi PeminjamController
 use App\Http\Controllers\WEB\AuthController;
-
 
 Route::get('/', function () {
     return view('login');
 });
 
-//admin
+// ==========================================
+// ADMIN ROUTES
+// ==========================================
 Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
@@ -22,9 +22,16 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
 
     // CRUD User
     Route::get('/users', [AdminController::class, 'indexUser'])->name('user.index');
-});
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('user.create');
+    Route::post('/users', [AdminController::class, 'storeUser'])->name('user.store');
+    Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('user.edit');
+    Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('user.update');
+    Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('user.destroy');
+}); 
 
-//petugas
+// ==========================================
+// PETUGAS ROUTES
+// ==========================================
 Route::middleware(['auth', 'role.petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     // Peminjaman & Persetujuan
     Route::get('/peminjaman', [PetugasController::class, 'indexPeminjaman'])->name('peminjaman.index');
@@ -34,7 +41,9 @@ Route::middleware(['auth', 'role.petugas'])->prefix('petugas')->name('petugas.')
     Route::post('/pengembalian', [PetugasController::class, 'storePengembalian'])->name('pengembalian.store');
 });
 
-//peminjam
+// ==========================================
+// PEMINJAM ROUTES
+// ==========================================
 Route::middleware(['auth', 'role.peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
     // Katalog & Pengajuan
     Route::get('/katalog', [PeminjamController::class, 'indexKatalog'])->name('katalog.index');
@@ -42,6 +51,9 @@ Route::middleware(['auth', 'role.peminjam'])->prefix('peminjam')->name('peminjam
     Route::get('/riwayat', [PeminjamController::class, 'indexRiwayat'])->name('riwayat.index');
 });
 
+// ==========================================
+// AUTH ROUTES
+// ==========================================
 // Route Tamu (Belum Login)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -51,4 +63,12 @@ Route::middleware('guest')->group(function () {
 // Route Logout (Harus sudah login)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-
+// ==========================================
+// KATEGORI ROUTES
+// ==========================================
+Route::get('/kategori', [AdminController::class, 'indexKategori'])->name('kategori.index');
+Route::get('/kategori/create', [AdminController::class, 'createKategori'])->name('kategori.create');
+Route::post('/kategori', [AdminController::class, 'storeKategori'])->name('kategori.store');
+Route::get('/kategori/{id}/edit', [AdminController::class, 'editKategori'])->name('kategori.edit');
+Route::put('/kategori/{id}', [AdminController::class, 'updateKategori'])->name('kategori.update');
+Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('kategori.destroy');

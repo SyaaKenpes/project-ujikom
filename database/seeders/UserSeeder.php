@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             [                 
                 'name' => 'Bagus Karim',                 
                 'email' => 'admin@gmail.com',                 
-                'password' => Hash::make('password123'),                 
+                'password' => Hash::make('password123'),             
                 'role' => 'admin',                 
                 'no_hp' => '081234567890',                 
                 'alamat' => 'Bandung, West Java',             

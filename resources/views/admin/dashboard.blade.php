@@ -32,8 +32,7 @@
                             <td class="py-3 px-4 border-b">{{ $log->aktivitas }}</td>
                         </tr>
                     @empty
-                        <!-- Anda bisa menambahkan baris kosong/pesan jika data kosong di sini, misalnya: -->
-                        <!-- <tr><td colspan="3" class="text-center py-4">Tidak ada aktivitas.</td></tr> -->
+
                         <tr>
                             <td colspan="3" class="py-4 text-center text-gray-500">Belum ada log aktivitas.</td>
                         </tr>
