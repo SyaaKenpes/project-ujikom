@@ -27,6 +27,16 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('user.edit');
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('user.update');
     Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('user.destroy');
+
+// ==========================================
+// KATEGORI ROUTES
+// ==========================================
+    Route::get('/kategori', [AdminController::class, 'indexKategori'])->name('kategori.index');
+    Route::get('/kategori/create', [AdminController::class, 'createKategori'])->name('kategori.create');
+    Route::post('/kategori', [AdminController::class, 'storeKategori'])->name('kategori.store');
+    Route::get('/kategori/{id}/edit', [AdminController::class, 'editKategori'])->name('kategori.edit');
+    Route::put('/kategori/{id}', [AdminController::class, 'updateKategori'])->name('kategori.update');
+    Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('kategori.destroy');
 }); 
 
 // ==========================================
@@ -63,12 +73,4 @@ Route::middleware('guest')->group(function () {
 // Route Logout (Harus sudah login)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ==========================================
-// KATEGORI ROUTES
-// ==========================================
-Route::get('/kategori', [AdminController::class, 'indexKategori'])->name('kategori.index');
-Route::get('/kategori/create', [AdminController::class, 'createKategori'])->name('kategori.create');
-Route::post('/kategori', [AdminController::class, 'storeKategori'])->name('kategori.store');
-Route::get('/kategori/{id}/edit', [AdminController::class, 'editKategori'])->name('kategori.edit');
-Route::put('/kategori/{id}', [AdminController::class, 'updateKategori'])->name('kategori.update');
-Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('kategori.destroy');
+

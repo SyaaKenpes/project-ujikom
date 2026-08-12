@@ -57,9 +57,9 @@ class AdminController extends Controller
         $users = User::When($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('role', 'like', "%{$search}%")
+                ->orWhere('role', 'like', "%{$search}%");
         })
-            ->lastes()
+            ->latest()
             ->paginate(10) // Menampilkan 10 data perhalaman
             ->withQueryString(); // Memastikan parameter search tetap ada saat pindah halaman
 
