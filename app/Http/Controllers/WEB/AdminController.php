@@ -21,32 +21,119 @@ class AdminController extends Controller
     }
 
     // CRUD Alat: Menampilkan daftar alat
-    public function indexAlat()
+    public function indexAlat(Request $request)
     {
-        $alats = Alat::with('kategori')->get();
-        return view('admin.alat.index', compact('alats'));
+        $search = $request->input('search');
+
+        $alats = Alat::with('kategori')
+            ->when($search, function ($query, $search) {
+                return $query->where('nama_alat', 'like', "%{$search}%")
+                    ->orWhere('status_kondisi', 'like', "%{$search}%")
+                    ->orWhereHas('kategori', function ($q) use ($search) {
+                        $q->where('nama_kategori', 'like', "%{$search}%");
+                    });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.alat.index', compact('alats', 'search'));
     }
+
+    // Menampilkan form tambah alat
+    public function createAlat()
+    {
+        $kategoris = Kategori::all();
+        return view('admin.alat.create', compact('kategoris'));
+    }
+
     // Menyimpan Alat Baru
     public function storeAlat(Request $request)
     {
-        // 1. Tambahin '$validatedData =' di sini
         $validatedData = $request->validate([
             'kategori_id'    => 'required',
             'nama_alat'      => 'required|string|max:255',
             'stok'           => 'required|integer',
             'status_kondisi' => 'required|string',
+            'deskripsi'      => 'nullable|string',
+            'gambar'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Sekarang $validatedData udah ada isinya, jadi aman dipanggil
+        // 1. Handle upload gambar jika ada
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientoriginalName();
+            $file->move(public_path('storage/alat'), $filename);
+            $validatedData['gambar'] = 'storage/alat/' . $filename;
+        }
+
         Alat::create($validatedData);
 
-        // Catat Log Aktivitas
+        // 2. Catat Log Aktivitas
         LogAktivitas::create([
-            'user_id'   => auth()->id,
+            'user_id'   => auth()->id(),
             'aktivitas' => 'Menambahkan alat baru: ' . $validatedData['nama_alat']
         ]);
 
         return redirect()->back()->with('success', 'Alat berhasil ditambahkan.');
+    }
+
+    
+    // 3. Menampilkan form edit alat
+    public function editAlat($id) {
+        $alat = Alat::findOrFail($id);
+        $kategoris = kategori::all();
+
+        return view('admin.alat.edit', compact('alat', 'kategoris'));
+    }
+
+    // 4. Memperbarui data alat
+    public function updateAlat(Request $request, $id)
+    {
+        $alat = Alat::findOrFail($id);
+
+        $request->validate([
+            'nama_alat'      => 'required|string|max:255',
+            'kategori_id'    => 'required|exists:kategoris,id',
+            'stok'           => 'required|integer|min:0',
+            'status_kondisi' => 'required|string|max:100',
+            'deskripsi'      => 'nullable|string',
+            'gambar'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        
+
+        // Handle Update Gambar jika ada file baru
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($alat->gambar && file_exists(public_path($alat->gambar))) {
+                unlink(public_path($alat->gambar));
+            }
+
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/alat'), $filename);
+            $data['gambar'] = 'storage/alat/' . $filename;
+        }
+
+        $alat->update($data);
+
+        return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil diperbarui.');
+    }
+
+    // 5. Menghapus ata alat
+    public function destroyAlat($id) {
+        $alat = Alat::findOrFail($id);
+
+
+        // Hapus file gambar fisik jika ada
+        if ($alat->gambar && file_exists(public_path($alat->gambar))) {
+            unlink(public_path($alat->gambar));
+        }
+
+        $alat->delete();
+
+        return redirect()->route('admin.alat.index')->with('success', 'data alat berhasil di hapus. ');
     }
 
     // CRUD User (Manajemen User Admin, Petugas, Peminjam)
@@ -205,4 +292,143 @@ class AdminController extends Controller
 
         return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
+
+    // 1. Menampilkan daftar peminjaman
+    public function indexPeminjaman(Request $request)
+    {
+        $search = $request->input('search');
+
+        $peminjamans = Peminjaman::with(['user', 'detailPinjams.alat'])
+            ->when($search, function ($query, $search) {
+                return $query->where('status', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.peminjaman.index', compact('peminjamans', 'search'));
+    }
+
+    // 2. Menampilkan form tambah peminjaman
+    public function createPeminjaman()
+    {
+        $users = User::where('role', 'peminjam')->get(); // Atau ambil semua user jika bebas
+        $alats = Alat::where('stok', '>', 0)->get();
+        return view('admin.peminjaman.create', compact('users', 'alats'));
+    }
+
+    // 3. Menyimpan data peminjaman baru
+    public function storePeminjaman(Request $request)
+    {
+        $request->validate([
+            'user_id'          => 'required|exists:users,id',
+            'tgl_pinjam'       => 'required|date',
+            'tgl_kembali_plan' => 'required|date|after_or_equal:tgl_pinjam',
+            'alat_id'          => 'required|array',
+            'alat_id.*'        => 'exists:alats,id',
+            'jumlah'           => 'required|array',
+            'jumlah.*'         => 'integer|min:1',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Buat transaksi utama peminjaman
+            $peminjaman = Peminjaman::create([
+                'user_id'          => $request->user_id,
+                'tgl_pinjam'       => $request->tgl_pinjam,
+                'tgl_kembali_plan' => $request->tgl_kembali_plan,
+                'status'           => 'diajukan', // Status awal
+            ]);
+
+            // Simpan detail alat yang dipinjam
+            foreach ($request->alat_id as $index => $alatId) {
+                $jumlahPinjam = $request->jumlah[$index];
+
+                $alat = Alat::findOrFail($alatId);
+
+                // Validasi stok
+                if ($alat->stok < $jumlahPinjam) {
+                    throw new \Exception("Stok alat '{$alat->nama_alat}' tidak mencukupi.");
+                }
+            }
+            DetailPinjam::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'alat_id'       => $alatId,
+                    'jumlah'        => $jumlahPinjam,
+                ]);
+
+                // Kurangi stok alat jika status langsung disetujui/dipinjam (Opsional, atau dikurangi saat status berubah jadi 'dipinjam')
+            }
+
+            DB::commit();
+            return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil diajukan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+    // 4. Memperbarui status peminjaman (Misal: dari diajukan -> dipinjam / selesai)
+    public function updateStatusPeminjaman(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::with('detailPinjams.alat')->findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:diajukan,dipinjam,selesai,telat',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $statusLama = $peminjaman->status;
+            $statusBaru = $request->status;
+
+            // Logika pengelolaan stok otomatis
+            if ($statusLama != 'dipinjam' && $statusBaru == 'dipinjam') {
+                // Kurangi stok karena barang resmi dipinjam
+                foreach ($peminjaman->detailPinjams as $detail) {
+                    $alat = $detail->alat;
+                    if ($alat->stok < $detail->jumlah) {
+                        throw new \Exception("Stok alat {$alat->nama_alat} tidak mencukupi untuk dipinjam.");
+                    }
+                    $alat->decrement('stok', $detail->jumlah);
+                }
+            } elseif ($statusLama == 'dipinjam' && ($statusBaru == 'selesai')) {
+                // Kembalikan stok karena barang sudah dikembalikan (selesai)
+                foreach ($peminjaman->detailPinjams as $detail) {
+                    $detail->alat->increment('stok', $detail->jumlah);
+                }
+            }
+
+            $peminjaman->update(['status' => $statusBaru]);
+        }
+        DB::commit();
+
+        return redirect()->route('admin.peminjaman.index')->with('success', 'Status peminjaman berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+
+    // 5. Menghapus data peminjaman
+    public function destroyPeminjaman($id)
+    {
+        $peminjaman = Peminjaman::with('detailPinjams')->findOrFail($id);
+
+        // Jika statusnya sedang dipinjam, kembalikan stok terlebih dahulu sebelum dihapus
+        if ($peminjaman->status == 'dipinjam') {
+            foreach ($peminjaman->detailPinjams as $detail) {
+                $detail->alat->increment('stok', $detail->jumlah);
+            }
+        }
+
+        $peminjaman->delete();
+
+        return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil dihapus.');
+    }
+    
 }
+
+    
+
