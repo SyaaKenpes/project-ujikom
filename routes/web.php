@@ -45,7 +45,7 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/peminjaman/create', [AdminController::class, 'createPeminjaman'])->name('peminjaman.create');
     Route::get('/peminjaman', [AdminController::class, 'storePeminjaman'])->name('peminjaman.store');
     Route::get('/peminjaman/{$id}/status', [AdminController::class, 'updateStatusPeminjaman'])->name('peminjaman.UpdateStatus');
-    Route::get('/peminjaman/{$id}', [AdminController::class, 'destroyPeminjaman'])->name('peminjaman.index');
+    Route::get('/peminjaman/{$id}', [AdminController::class, 'destroyPeminjaman'])->name('peminjaman+.index');
 
 }); 
 
