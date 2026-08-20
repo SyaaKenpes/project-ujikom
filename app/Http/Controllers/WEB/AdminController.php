@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\WEB;
 
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Alat;
 use App\Models\Kategori;
 use App\Models\User;
+use App\Models\Peminjaman;
+use App\Models\DetailPinjam;
 use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Hash;
 
@@ -328,7 +331,7 @@ class AdminController extends Controller
             'tgl_pinjam'       => 'required|date',
             'tgl_kembali_plan' => 'required|date|after_or_equal:tgl_pinjam',
             'alat_id'          => 'required|array',
-            'alat_id.*'        => 'exists:alats,id',
+            'alat_id.*'        => 'exists:alat,id',
             'jumlah'           => 'required|array',
             'jumlah.*'         => 'integer|min:1',
         ]);
@@ -346,29 +349,29 @@ class AdminController extends Controller
             // Simpan detail alat yang dipinjam
             foreach ($request->alat_id as $index => $alatId) {
                 $jumlahPinjam = $request->jumlah[$index];
-
                 $alat = Alat::findOrFail($alatId);
 
                 // Validasi stok
                 if ($alat->stok < $jumlahPinjam) {
                     throw new \Exception("Stok alat '{$alat->nama_alat}' tidak mencukupi.");
                 }
-            }
-            DetailPinjam::create([
+                
+                DetailPinjam::create([
                     'peminjaman_id' => $peminjaman->id,
                     'alat_id'       => $alatId,
                     'jumlah'        => $jumlahPinjam,
                 ]);
-
-                // Kurangi stok alat jika status langsung disetujui/dipinjam (Opsional, atau dikurangi saat status berubah jadi 'dipinjam')
-            }
+            } 
 
             DB::commit();
             return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil diajukan.');
-        } catch (\Exception $e) {
+            
+        } catch (\Exception $e) { // <-- Sekarang try-catch nyambung dengan sempurna!
             DB::rollBack();
             return back()->withInput()->with('error', $e->getMessage());
         }
+
+    }
 
     // 4. Memperbarui status peminjaman (Misal: dari diajukan -> dipinjam / selesai)
     public function updateStatusPeminjaman(Request $request, $id)
@@ -376,7 +379,7 @@ class AdminController extends Controller
         $peminjaman = Peminjaman::with('detailPinjams.alat')->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:diajukan,dipinjam,selesai,telat',
+            'status' => 'required|in:diajukan,dipinjam,dikembalikan,telat',
         ]);
 
         DB::beginTransaction();
@@ -402,14 +405,16 @@ class AdminController extends Controller
             }
 
             $peminjaman->update(['status' => $statusBaru]);
-        }
-        DB::commit();
-
-        return redirect()->route('admin.peminjaman.index')->with('success', 'Status peminjaman berhasil diperbarui.');
-        } catch (\Exception $e) {
+            
+            // MASUKIN KE DALAM TRY
+            DB::commit();
+            return redirect()->route('admin.peminjaman.index')->with('success', 'Status peminjaman berhasil diperbarui.');
+            
+        } catch (\Exception $e) { 
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
+    } 
 
     // 5. Menghapus data peminjaman
     public function destroyPeminjaman($id)
@@ -430,5 +435,4 @@ class AdminController extends Controller
     
 }
 
-    
 

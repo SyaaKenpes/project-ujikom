@@ -5,6 +5,7 @@ use App\Http\Controllers\WEB\AdminController;
 use App\Http\Controllers\WEB\PetugasController;
 use App\Http\Controllers\WEB\PeminjamController; 
 use App\Http\Controllers\WEB\AuthController;
+use App\Http\Controllers\WEB\PengembalianController;
 
 Route::get('/', function () {
     return view('login');
@@ -43,10 +44,14 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     // CRUD Peminjaman
     Route::get('/peminjaman', [AdminController::class, 'indexPeminjaman'])->name('peminjaman.index');
     Route::get('/peminjaman/create', [AdminController::class, 'createPeminjaman'])->name('peminjaman.create');
-    Route::get('/peminjaman', [AdminController::class, 'storePeminjaman'])->name('peminjaman.store');
-    Route::get('/peminjaman/{$id}/status', [AdminController::class, 'updateStatusPeminjaman'])->name('peminjaman.UpdateStatus');
-    Route::get('/peminjaman/{$id}', [AdminController::class, 'destroyPeminjaman'])->name('peminjaman+.index');
+    Route::post('/peminjaman', [AdminController::class, 'storePeminjaman'])->name('peminjaman.store');
+    Route::put('/peminjaman/{id}/status', [AdminController::class, 'updateStatusPeminjaman'])->name('peminjaman.updateStatus');
+    Route::delete('/peminjaman/{id}', [AdminController::class, 'destroyPeminjaman'])->name('peminjaman.destroy');
 
+    // CRUD Pengembalian
+    Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::get('/pengembalian/create/{id}', [PengembalianController::class, 'create'])->name('pengembalian.create');
+    Route::post('/pengembalian', [PengembalianController::class, 'store'])->name('pengembalian.store');
 }); 
 
 // ==========================================

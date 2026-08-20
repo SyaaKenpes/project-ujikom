@@ -103,12 +103,20 @@
                                                 {{ $peminjaman->status == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
                                             <option value="dipinjam"
                                                 {{ $peminjaman->status == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                                            <option value="selesai"
-                                                {{ $peminjaman->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                            <option value="dikembalikan"
+                                                {{ $peminjaman->status == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan
+                                            </option>
                                             <option value="telat" {{ $peminjaman->status == 'telat' ? 'selected' : '' }}>
                                                 Telat</option>
                                         </select>
                                     </form>
+
+                                    @if ($peminjaman->status == 'dipinjam' || $peminjaman->status == 'telat')
+                                        <a href="{{ route('admin.pengembalian.create', $peminjaman->id) }}"
+                                            class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded text-sm mb-1 text-center w-full">
+                                            Kembalikan
+                                        </a>
+                                    @endif
 
                                     <!-- Tombol Hapus -->
                                     <form action="{{ route('admin.peminjaman.destroy', $peminjaman->id) }}" method="POST"

@@ -47,6 +47,18 @@
                         class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.alat.*') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white' }}">
                         Kelola Alat
                     </a>
+
+                    <!-- kelola peminjam -->
+                    <a href="{{ route('admin.peminjaman.index') }}"
+                        class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.peminjaman.*') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white' }}">
+                        kelola peminjaman
+                    </a>
+
+                    <!-- kelola pengembalian -->
+                    <a href="{{ route('admin.pengembalian.index') }}"
+                        class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.pengembalian.*') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white' }}">
+                        kelola pengembalian
+                    </a>
                 </nav>
             </div>
 
