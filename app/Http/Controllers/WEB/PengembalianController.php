@@ -12,20 +12,55 @@ use Illuminate\Support\Facades\Auth;
 
 class PengembalianController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengembalians = Pengembalian::with(['peminjaman.user', 'peminjaman.detailPinjams.alat', 'petugas'])
-                            ->latest()
-                            ->get();
+        // 1. Tangkap inputan dari kolom search
+        $search = $request->input('search');
 
-        return view('admin.pengembalian.index', compact('pengembalians'));
+        // 2. Ambil data yang statusnya 'dipinjam' dan filter kalau ada pencarian
+        $sedangDipinjam = Peminjaman::with('user', 'detailPinjams.alat')
+            ->where('status', 'dipinjam')
+            ->when($search, function ($query, $search) {
+                // Cari berdasarkan nama user di tabel peminjaman
+                return $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        // 3. Ambil data riwayat dan filter juga kalau ada pencarian
+        $riwayatKembali = Pengembalian::with(['peminjaman.user', 'petugas'])
+            ->when($search, function ($query, $search) {
+                // Karena relasinya lebih dalam (Pengembalian -> Peminjaman -> User), pakai dot notation
+                return $query->whereHas('peminjaman.user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+                
+        // 4. Lempar variabel $search ke view biar form Blade-nya tetep nyimpen teks yang diketik
+        return view('admin.pengembalian.index', compact('sedangDipinjam', 'riwayatKembali', 'search'));
     }
 
     public function create($id)
     {
-        // Tarik data peminjaman beserta relasinya
         $peminjaman = Peminjaman::with('user', 'detailPinjams.alat')->findOrFail($id);
-        return view('admin.pengembalian.create', compact('peminjaman'));
+    
+        // Hitung telat dan denda otomatis
+        $tglRencana = \Carbon\Carbon::parse($peminjaman->tgl_kembali_plan);
+        $tglSekarang = \Carbon\Carbon::now();
+    
+        $telatHari = 0;
+        $dendaOtomatis = 0;
+    
+        if ($tglSekarang->greaterThan($tglRencana)) {
+            $telatHari = $tglRencana->diffInDays($tglSekarang); 
+            $dendaOtomatis = $telatHari * 2000; // Contoh: Denda Rp 2.000 per hari telat
+        }
+
+    return view('admin.pengembalian.create', compact('peminjaman', 'telatHari', 'dendaOtomatis', 'tglSekarang'));
     }
 
     public function store(Request $request)

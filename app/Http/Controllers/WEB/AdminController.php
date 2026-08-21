@@ -17,10 +17,26 @@ use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
     // Menampilkan Dashboard Admin & Log Aktivitas
-    public function index()
+    // Menampilkan Dashboard Admin & Log Aktivitas
+    public function index(Request $request)
     {
-        $logs = LogAktivitas::with('user')->latest()->take(10)->get();
-        return view('admin.dashboard', compact('logs'));
+        // 1. Tangkap kata kunci pencarian
+        $search = $request->input('search');
+
+        // 2. Ambil data log dengan filter pencarian (bisa cari nama user atau isi aktivitasnya)
+        $logs = LogAktivitas::with('user')
+            ->when($search, function ($query, $search) {
+                $query->where('aktivitas', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // 3. Kirim variabel $search ke view
+        return view('admin.dashboard', compact('logs', 'search'));
     }
 
     // CRUD Alat: Menampilkan daftar alat
@@ -97,14 +113,15 @@ class AdminController extends Controller
 
         $request->validate([
             'nama_alat'      => 'required|string|max:255',
-            'kategori_id'    => 'required|exists:kategoris,id',
+            'kategori_id'    => 'required|exists:kategori,id',
             'stok'           => 'required|integer|min:0',
             'status_kondisi' => 'required|string|max:100',
             'deskripsi'      => 'nullable|string',
             'gambar'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        
+        // TANGKAP SEMUA DATA INPUTAN DARI FORM (Kecuali gambar)
+        $data = $request->except('gambar');
 
         // Handle Update Gambar jika ada file baru
         if ($request->hasFile('gambar')) {
@@ -116,9 +133,12 @@ class AdminController extends Controller
             $file = $request->file('gambar');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('storage/alat'), $filename);
+            
+            // Masukkan path gambar baru ke dalam array $data
             $data['gambar'] = 'storage/alat/' . $filename;
         }
 
+        // Eksekusi update ke database
         $alat->update($data);
 
         return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil diperbarui.');

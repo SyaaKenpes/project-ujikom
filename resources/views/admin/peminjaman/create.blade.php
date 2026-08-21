@@ -11,7 +11,8 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.peminjaman.store') }}" method="POST">
+        <!-- Tambahan script onsubmit di tag form ini -->
+        <form action="{{ route('admin.peminjaman.store') }}" method="POST" onsubmit="document.getElementById('btn-submit').disabled=true; document.getElementById('btn-submit').innerText='Memproses...';">
             @csrf
 
             <div class="mb-4">
@@ -68,10 +69,13 @@
 
             <div class="flex justify-end space-x-2">
                 <a href="{{ route('admin.peminjaman.index') }}"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg text-sm font-semibold transition">Batal</a>
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Simpan
-                    Peminjaman</button>
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center">Batal</a>
+                
+                <!-- Tambahan ID di tombol submit -->
+                <button type="submit" id="btn-submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    Simpan Peminjaman
+                </button>
             </div>
         </form>
     </div>
