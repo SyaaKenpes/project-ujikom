@@ -49,7 +49,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password' => 'hashed', // Laravel otomatis meng-hash teks apapun yang masuk ke properti password! 
         ];
     }
 
