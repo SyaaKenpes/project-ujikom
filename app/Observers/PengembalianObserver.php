@@ -2,47 +2,39 @@
 
 namespace App\Observers;
 
+use App\Models\LogAktivitas;
 use App\Models\Pengembalian;
+use Illuminate\Support\Facades\Auth;
 
 class PengembalianObserver
 {
-    /**
-     * Handle the Pengembalian "created" event.
-     */
+    private function catatLog(string $pesan): void
+    {
+        if (Auth::check()) {
+            LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => $pesan,
+            ]);
+        }
+    }
+
     public function created(Pengembalian $pengembalian): void
     {
-        //
+        $this->catatLog("Memproses pengembalian alat untuk Peminjaman ID: #{$pengembalian->peminjaman_id}");
     }
 
-    /**
-     * Handle the Pengembalian "updated" event.
-     */
     public function updated(Pengembalian $pengembalian): void
     {
-        //
+        $perubahan = array_diff(array_keys($pengembalian->getChanges()), ['updated_at']);
+
+        if (!empty($perubahan)) {
+            $kolom = implode(', ', $perubahan);
+            $this->catatLog("Merevisi data pengembalian (ID Kembali: #{$pengembalian->id}, Peminjaman ID: #{$pengembalian->peminjaman_id}, Kolom diubah: {$kolom})");
+        }
     }
 
-    /**
-     * Handle the Pengembalian "deleted" event.
-     */
     public function deleted(Pengembalian $pengembalian): void
     {
-        //
-    }
-
-    /**
-     * Handle the Pengembalian "restored" event.
-     */
-    public function restored(Pengembalian $pengembalian): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Pengembalian "force deleted" event.
-     */
-    public function forceDeleted(Pengembalian $pengembalian): void
-    {
-        //
+        $this->catatLog("Membatalkan/menghapus riwayat pengembalian (Peminjaman ID: #{$pengembalian->peminjaman_id})");
     }
 }
