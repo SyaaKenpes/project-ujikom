@@ -55,7 +55,7 @@ class UserSeeder extends Seeder
                 'role' => 'peminjam',                 
                 'no_hp' => '085678901234',                 
                 'alamat' => 'Banjaran, Bandung',             
-            ],         
+            ],    
         ];          
         
         foreach ($users as $user) {             
