@@ -106,6 +106,10 @@ class PengembalianController extends Controller
             }
 
             DB::commit();
+            \App\Models\LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Memproses pengembalian alat untuk peminjaman ID #' . $peminjaman->id . ($totalDenda > 0 ? ' dan mengenakan denda Rp ' . number_format($totalDenda, 0, ',', '.') : '.')
+            ]);
             return redirect()->route('admin.peminjaman.index')->with('success', 'Barang berhasil dikembalikan. Total Denda: Rp ' . number_format($totalDenda, 0, ',', '.'));
 
         } catch (\Exception $e) {

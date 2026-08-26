@@ -27,4 +27,9 @@ class Alat extends Model
     public function detailPinjam(): HasMany {
         return $this->hasMany(DetailPinjam::class);
     }
+
+    public function scopeTersedia($query) 
+    { 
+        return $query->where('stok', '>', 0)->where('status_kondisi', 'Baik'); 
+    }
 }

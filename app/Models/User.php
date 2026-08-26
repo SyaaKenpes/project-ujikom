@@ -65,16 +65,5 @@ class User extends Authenticatable
         return $this->hasMany(LogAktivitas::class);     
     } 
 
-    public function scopeTersedia($query) 
-    { 
-        return $query->where('stok', '>', 0)->where('status_kondisi', 'Baik'); 
-    }
-
-    protected function casts(): array 
-    { 
-    return [ 
-        'email_verified_at' => 'datetime', 
-        'password' => 'hashed', // Laravel otomatis meng-hash teks apapun yang masuk ke properti password! 
-        ]; 
-    }
+    
 }
