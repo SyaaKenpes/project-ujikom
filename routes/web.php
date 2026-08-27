@@ -52,6 +52,8 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
     Route::get('/pengembalian/create/{id}', [PengembalianController::class, 'create'])->name('pengembalian.create');
     Route::post('/pengembalian', [PengembalianController::class, 'store'])->name('pengembalian.store');
+
+    Route::get('/laporan/pdf', [PengembalianController::class, 'cetakLaporan'])->name('laporan.pdf');
 }); 
 
 // ==========================================

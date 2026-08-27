@@ -9,6 +9,7 @@ use App\Models\Pengembalian;
 use Carbon\Carbon; // hitung hari
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengembalianController extends Controller
 {
@@ -116,5 +117,17 @@ class PengembalianController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function cetakLaporan()
+    {
+        // Ambil data riwayat pengembalian beserta relasinya
+        $riwayatKembali = \App\Models\Pengembalian::with(['peminjaman.user', 'petugas'])->latest()->get();
+
+        // Load view khusus PDF dan lempar datanya
+        $pdf = Pdf::loadView('admin.laporan_pdf', compact('riwayatKembali'));
+
+        // Format ukuran kertas lanskap/potrait & download file
+        return $pdf->download('laporan-peminjaman-' . date('Y-m-d') . '.pdf');
     }
 }
