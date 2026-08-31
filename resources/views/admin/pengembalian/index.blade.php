@@ -34,7 +34,7 @@
                     <thead class="text-sm text-gray-600 uppercase bg-white border-b border-gray-200">
                         <tr>
                             <th class="py-4 px-6 font-bold">PEMINJAM</th>
-                            <th class="py-4 px-6 font-bold">TGL PINJAM</th>
+                            <th class="py-4 px-6 font-bold">TANGGAL PINJAM</th>
                             <th class="py-4 px-6 font-bold">BATAS KEMBALI</th>
                             <th class="py-4 px-6 font-bold text-center">AKSI</th>
                         </tr>

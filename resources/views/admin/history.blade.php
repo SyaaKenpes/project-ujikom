@@ -38,7 +38,7 @@
         <!-- Tabel History -->
         <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
             <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50">
+                <thead class="text-sm text-gray-600 uppercase bg-white border-b border-gray-200">
                     <tr>
                         <th class="p-3 border-b">Peminjam</th>
                         <th class="p-3 border-b">Tanggal Kembali</th>
