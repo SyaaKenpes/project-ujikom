@@ -119,15 +119,45 @@ class PengembalianController extends Controller
         }
     }
 
-    public function cetakLaporan()
+    // 1. Fungsi buat nampilin halaman History + Filter + Pagination
+    public function history(Request $request)
     {
-        // Ambil data riwayat pengembalian beserta relasinya
-        $riwayatKembali = \App\Models\Pengembalian::with(['peminjaman.user', 'petugas'])->latest()->get();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        // Load view khusus PDF dan lempar datanya
-        $pdf = Pdf::loadView('admin.laporan_pdf', compact('riwayatKembali'));
+        // Tarik data relasinya dari awal
+        $query = \App\Models\Pengembalian::with(['peminjaman.user', 'petugas'])->latest();
 
-        // Format ukuran kertas lanskap/potrait & download file
-        return $pdf->download('laporan-peminjaman-' . date('Y-m-d') . '.pdf');
+        // Kalau admin ngisi rentang tanggal, filter datanya!
+        if ($startDate && $endDate) {
+            $query->whereBetween('tgl_kembali', [$startDate, $endDate]);
+        }
+
+        // Panggil pagination, maksimal 10 data per halaman
+        $histories = $query->paginate(10);
+
+        // Biar pas pindah halaman (pagination) filternya gak kereset
+        $histories->appends($request->all());
+
+        return view('admin.history', compact('histories', 'startDate', 'endDate'));
+    }
+
+    // 2. Modifikasi fungsi cetak PDF biar ngikutin Filter Tanggal
+    public function cetakLaporan(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = \App\Models\Pengembalian::with(['peminjaman.user', 'petugas'])->latest();
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('tgl_kembali', [$startDate, $endDate]);
+        }
+
+        // Kalau cetak PDF gak usah di-paginate, get() semuanya sesuai filter
+        $riwayatKembali = $query->get();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.laporan_pdf', compact('riwayatKembali'));
+        return $pdf->download('laporan-peminjaman.pdf');
     }
 }

@@ -54,6 +54,7 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/pengembalian', [PengembalianController::class, 'store'])->name('pengembalian.store');
 
     Route::get('/laporan/pdf', [PengembalianController::class, 'cetakLaporan'])->name('laporan.pdf');
+    Route::get('/history', [PengembalianController::class, 'history'])->name('history');
 }); 
 
 // ==========================================

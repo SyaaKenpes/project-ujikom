@@ -15,10 +15,6 @@
         <!-- HEADER KOTAK DENGAN INPUT SEARCH -->
         <div class="p-5 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
             <h3 class="text-lg font-bold text-gray-800">Log Aktivitas Terbaru</h3>
-            <a href="{{ route('admin.laporan.pdf') }}"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">
-                📥 Cetak Laporan PDF
-            </a>
             <!-- Form Search yang stylenya sama persis -->
             <form action="{{ route('admin.dashboard') }}" method="GET" class="flex w-full md:w-80">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari aktivitas / user..."

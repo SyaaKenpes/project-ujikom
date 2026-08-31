@@ -59,6 +59,12 @@
                         class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.pengembalian.*') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white' }}">
                         kelola pengembalian
                     </a>
+
+                    <!-- kelola history -->
+                    <a href="{{ route('admin.history') }}"
+                        class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.pengembalian.*') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white' }}">
+                        kelola history
+                    </a>
                 </nav>
             </div>
 
