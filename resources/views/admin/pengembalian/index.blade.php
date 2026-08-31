@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', 'Kelola Kategori - Panel Admin')
+@section('header-title', 'Manajemen Pengembalian')
+
 @section('content')
     <div class="container mx-auto px-4 py-6">
 

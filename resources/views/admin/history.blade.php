@@ -1,5 +1,9 @@
 @extends('layouts.app') <!-- Sesuaikan sama layout utama lu -->
 
+
+@section('title', 'Kelola Kategori - Panel Admin')
+@section('header-title', 'Manajemen History')
+
 @section('content')
     <div class="container mx-auto p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Kelola History Peminjaman</h2>

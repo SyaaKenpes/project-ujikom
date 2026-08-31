@@ -106,6 +106,12 @@ class PengembalianController extends Controller
                 $detail->alat->increment('stok', $detail->jumlah);
             }
 
+            // 4. Catat aktivitas ke tabel log sistem
+            \App\Models\LogAktivitas::create([
+            'user_id' => Auth::id(),
+            'aktivitas' => 'Memproses pengembalian alat atas nama ' . $peminjaman->user->name . ($totalDenda > 0 ? ' dan mengenakan denda Rp ' . number_format($totalDenda, 0, ',', '.') : '.')
+            ]);
+
             DB::commit();
             \App\Models\LogAktivitas::create([
                 'user_id' => Auth::id(),
