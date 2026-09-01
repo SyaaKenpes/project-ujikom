@@ -106,7 +106,6 @@ class PeminjamanController extends Controller
 
                 $peminjaman->detailPinjam()->delete();
                 foreach ($request->items as $item) {
-                    // Ditambahkan lockForUpdate agar konsisten aman dari race condition saat update data draft
                     $alat = Alat::lockForUpdate()->findOrFail($item['alat_id']);
 
                     if ($alat->stok < $item['jumlah']) {
