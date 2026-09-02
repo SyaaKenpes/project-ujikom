@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
     {
         $users = [             
             [                 
-                'name' => 'Bagus Karim',                 
+                'name' => 'Pasyha zulfahmi rochmat',                 
                 'email' => 'admin@gmail.com',                 
                 'password' => Hash::make('password123'),             
                 'role' => 'admin',                 
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
                 'alamat' => 'Bandung, West Java',             
             ],             
             [                 
-                'name' => 'Arif Muhammad',                 
+                'name' => 'daus dos santos',                 
                 'email' => 'petugas@gmail.com',                 
                 'password' => Hash::make('password123'),                 
                 'role' => 'petugas',                 
@@ -33,24 +33,24 @@ class UserSeeder extends Seeder
                 'alamat' => 'Baleendah, Bandung',             
             ],             
             [                 
-                'name' => 'Rian Setiawan',                 
-                'email' => 'rian@gmail.com',                 
+                'name' => 'dadang el kembar',                 
+                'email' => 'dadang@gmail.com',                 
                 'password' => Hash::make('password123'),                 
                 'role' => 'peminjam',                                        
                 'no_hp' => '083456789012',                                     
                 'alamat' => 'Ciparay, Bandung',             
             ],             
             [                 
-                'name' => 'Siti Aminah',                 
-                'email' => 'siti@gmail.com',                 
+                'name' => 'barman ferdinan agus',                 
+                'email' => 'barman@gmail.com',                 
                 'password' => Hash::make('password123'),                 
                 'role' => 'peminjam',                 
                 'no_hp' => '084567890123',                 
                 'alamat' => 'Dayeuhkolot, Bandung',                             
             ],             
             [ 
-                'name' => 'Eka Pratama',                 
-                'email' => 'eka@gmail.com',                 
+                'name' => 'eko bin epul bin nasir',                 
+                'email' => 'eko@gmail.com',                 
                 'password' => Hash::make('password123'),                 
                 'role' => 'peminjam',                 
                 'no_hp' => '085678901234',                 
