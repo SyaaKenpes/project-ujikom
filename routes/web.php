@@ -14,7 +14,7 @@ Route::get('/', function () {
 // ==========================================
 // ADMIN ROUTES
 // ==========================================
-Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
     // CRUD Alat
@@ -60,23 +60,34 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
 // ==========================================
 // PETUGAS ROUTES
 // ==========================================
-Route::middleware(['auth', 'role.petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+// petugas
+Route::middleware(['auth', 'role:petugas,admin'])->prefix('petugas')->name('petugas.')->group(function () {
     // Peminjaman & Persetujuan
     Route::get('/peminjaman', [PetugasController::class, 'indexPeminjaman'])->name('peminjaman.index');
-    Route::post('/peminjaman', [PetugasController::class, 'storePeminjaman'])->name('peminjaman.store');
+    Route::post('/peminjaman/{id}/setujui', [PetugasController::class, 'setujuiPeminjaman'])->name('peminjaman.setujui');
 
     // Pengembalian & Denda
-    Route::post('/pengembalian', [PetugasController::class, 'storePengembalian'])->name('pengembalian.store');
+    Route::post('/pengembalian/{id}', [PetugasController::class, 'prosesPengembalian'])->name('pengembalian.proses');
+    Route::get('/pengembalian', [PetugasController::class, 'indexPengembalian'])->name('pengembalian.index');
+
+    // Laporan Peminjaman
+    Route::get('/laporan', [PetugasController::class, 'laporan'])->name('laporan.index');
+    Route::get('/laporan/cetak', [PetugasController::class, 'cetakLaporan'])->name('laporan.cetak');
+
+    // Route Tampil Halaman Form Pengembalian
+    Route::get('/pengembalian/{id}/proses', [PetugasController::class, 'formPengembalian'])->name('pengembalian.form');
 });
 
 // ==========================================
 // PEMINJAM ROUTES
 // ==========================================
-Route::middleware(['auth', 'role.peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
+Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
     // Katalog & Pengajuan
     Route::get('/katalog', [PeminjamController::class, 'indexKatalog'])->name('katalog.index');
     Route::post('/peminjaman', [PeminjamController::class, 'storePengajuan'])->name('peminjaman.store');
     Route::get('/riwayat', [PeminjamController::class, 'indexRiwayat'])->name('riwayat.index');
+
+    
 });
 
 // ==========================================
