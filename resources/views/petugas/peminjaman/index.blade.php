@@ -18,7 +18,7 @@
 
     <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         <div class="p-5 border-b border-gray-200 bg-gray-50">
-            <h3 class="text-lg font-bold text-gray-800">Menunggu Verifikasi Persetujuan</h3>
+            <h3 class="text-lg font-bold text-gray-800">Menunggu Verifikasi Persejujuran</h3>
             <form action="{{ route('petugas.peminjaman.index') }}" method="GET" class="flex w-full md:w-80">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama peminjam..."
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
