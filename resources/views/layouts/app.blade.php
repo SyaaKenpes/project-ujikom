@@ -20,7 +20,7 @@
             <!-- Bagian Atas: Brand & Menu Navigation -->
             <div>
                 <div class="p-5 text-xl font-bold tracking-wider border-b border-gray-800">
-                    PANEL PILIP
+                    PANEL ADMIN
                 </div>
 
                 <nav class="p-4 space-y-3">
