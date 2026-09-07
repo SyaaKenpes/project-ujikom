@@ -19,14 +19,30 @@
 
             <!-- Bagian Atas: Brand & Menu Navigation -->
             <div>
-                <div class="p-5 text-xl font-bold tracking-wider border-b border-gray-800">
-                    PANEL ADMIN
+                <!-- Brand & Logo Dinamis -->
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-800">
+                    <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <img src="{{ asset('images/logo.png') }}" alt="GearHub Logo"
+                            class="w-full h-full object-contain">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-white tracking-wide leading-tight">GearHub</span>
+                        <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">
+                            @if (auth()->user()->role === 'admin')
+                                Bagian Admin
+                            @elseif (auth()->user()->role === 'petugas')
+                                Bagian Petugas
+                            @else
+                                Bagian {{ ucfirst(auth()->user()->role) }}
+                            @endif
+                        </span>
+                    </div>
                 </div>
 
                 <nav class="p-4 space-y-3">
                     <!-- Menu khusus admin -->
-                    <!-- Dashboard -->
                     @if (auth()->user()->role === 'admin')
+                        <!-- Dashboard -->
                         <a href="{{ route('admin.dashboard') }}"
                             class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('admin.dashboard') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
                             <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none"
@@ -47,7 +63,7 @@
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
                                 </path>
                             </svg>
-                            Kelola Pilip
+                            Kelola User
                         </a>
 
                         <!-- Kelola Kategori -->
@@ -75,7 +91,7 @@
                         </a>
 
                         <!-- Kelola Peminjaman -->
-                        <a href="{{ route('admin.pengembalian.index') }}"
+                        <a href="{{ route('admin.peminjaman.index') }}"
                             class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('admin.peminjaman.*') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
                             <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +110,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
-                            Kelola Pengemberlian
+                            Kelola Pengembalian
                         </a>
 
                         <!-- Menu khusus petugas -->

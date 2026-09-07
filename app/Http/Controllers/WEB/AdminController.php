@@ -17,13 +17,12 @@ use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
     // Menampilkan Dashboard Admin & Log Aktivitas
-    // Menampilkan Dashboard Admin & Log Aktivitas
     public function index(Request $request)
     {
         // 1. Tangkap kata kunci pencarian
         $search = $request->input('search');
 
-        // 2. Ambil data log dengan filter pencarian (bisa cari nama user atau isi aktivitasnya)
+        // 2. Ambil data log dengan filter pencarian
         $logs = LogAktivitas::with('user')
             ->when($search, function ($query, $search) {
                 $query->where('aktivitas', 'like', "%{$search}%")
@@ -35,9 +34,25 @@ class AdminController extends Controller
             ->take(10)
             ->get();
 
-        // 3. Kirim variabel $search ke view
-        return view('admin.dashboard', compact('logs', 'search'));
+        // 3. Hitung Data untuk Stats Cards
+        $totalAlat = Alat::count();
+        $peminjamanAktif = Peminjaman::where('status', 'dipinjam')->count(); 
+        $totalPending = Peminjaman::where('status', 'pending')->count();
+        $alatRusak = Alat::where('status_kondisi', 'rusak')->count();
+        $totalUser = User::count();
+
+        // 4. Kirim semua variabel ke view admin.dashboard
+        return view('admin.dashboard', compact(
+            'logs', 
+            'search',
+            'totalAlat',
+            'peminjamanAktif',
+            'totalPending',
+            'alatRusak',
+            'totalUser'
+        ));
     }
+
 
     // CRUD Alat: Menampilkan daftar alat
     public function indexAlat(Request $request)

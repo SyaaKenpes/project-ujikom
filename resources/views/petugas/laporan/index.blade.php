@@ -11,7 +11,7 @@
         <form action="{{ route('petugas.laporan.index') }}" method="GET"
             class="p-5 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Status Peminjambut:</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Status Peminjaman:</label>
                 <select name="status"
                     class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500">
                     <option value="">Semua Status</option>
@@ -47,10 +47,10 @@
     <!-- Tabel Hasil & Tombol Cetak -->
     <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         <div class="p-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-gray-800">Hasil Rekap Pilip</h3>
+            <h3 class="text-lg font-bold text-gray-800">Hasil Rekap Peminjaman</h3>
             <a href="{{ route('petugas.laporan.cetak', request()->all()) }}" target="_blank"
                 class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-semibold rounded-lg transition shadow-sm flex items-center space-x-2">
-                <span>Cetak / Pilip Laporan</span>
+                <span>Cetak Laporan</span>
             </a>
         </div>
 
@@ -60,7 +60,7 @@
                     <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
                         <th class="py-3 px-4 border-b">No</th>
                         <th class="py-3 px-4 border-b">Peminjam</th>
-                        <th class="py-3 px-4 border-b">Tgl Pilip</th>
+                        <th class="py-3 px-4 border-b">Tgl</th>
                         <th class="py-3 px-4 border-b">Rencana Kembali</th>
                         <th class="py-3 px-4 border-b">Status</th>
                         <th class="py-3 px-4 border-b">Detail Alat</th>
