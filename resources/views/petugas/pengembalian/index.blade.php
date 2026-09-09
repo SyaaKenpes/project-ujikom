@@ -4,11 +4,6 @@
 @section('header-title', 'Pemantauan & Proses Pengembalian Alat')
 
 @section('content')
-    @if (session('success'))
-        <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg shadow-sm text-sm">
-            {{ session('success') }}
-        </div>
-    @endif
     @if (session('error'))
         <div class="mb-4 bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg shadow-sm text-sm">
             {{ session('error') }}
@@ -40,11 +35,17 @@
             </form>
         </div>
 
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative m-4" role="alert">
+                <strong class="font-bold">Berhasil! </strong>
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
-                        <th class="py-3 px-4 border-b">Peminjam</th>
                         <th class="py-3 px-4 border-b">Peminjam</th>
                         <th class="py-3 px-4 border-b">Tgl Pinjam</th>
                         <th class="py-3 px-4 border-b">Rencana Kembali</th>
@@ -79,9 +80,6 @@
                                 </ul>
                             </td>
                             <td class="py-3 px-4 border-b text-center">
-                                <!-- Form Proses Pengembalian -->
-                            <td class="py-3 px-4 border-b text-center">
-                                <!-- Form Proses Pengembalian -->
                                 <a href="{{ route('petugas.pengembalian.form', $item->id) }}"
                                     class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow-sm">
                                     Proses Pengembalian &rarr;

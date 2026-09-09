@@ -72,23 +72,24 @@ class PetugasController extends Controller
     }
 
     public function laporan(Request $request)
-    {
-        $status = $request->input('status');
-        $dari_tanggal = $request->input('dari_tanggal');
-        $sampai_tanggal = $request->input('sampai_tanggal');
+{
+    $status = $request->input('status');
+    $dari_tanggal = $request->input('dari_tanggal');
+    $sampai_tanggal = $request->input('sampai_tanggal');
 
-        $laporans = Peminjaman::with(['user', 'detailPinjams.alat', 'pengembalian'])
-            ->when($status, function ($query, $status) {
-                return $query->where('status', $status);
-            })
-            ->when($dari_tanggal && $sampai_tanggal, function ($query) use ($dari_tanggal, $sampai_tanggal) {
-                return $query->whereBetween('tgl_pinjam', [$dari_tanggal, $sampai_tanggal]);
-            })
-            ->latest()
-            ->get();
+    $laporans = Peminjaman::with(['user', 'detailPinjams.alat', 'pengembalian'])
+        // KUNCI UTAMA: Hanya ambil data yang statusnya sudah Dikembalikan
+        ->where('status', 'Dikembalikan')
+        
+        // Filter tanggal jika diisi
+        ->when($dari_tanggal && $sampai_tanggal, function ($query) use ($dari_tanggal, $sampai_tanggal) {
+            return $query->whereBetween('tgl_pinjam', [$dari_tanggal, $sampai_tanggal]);
+        })
+        ->latest()
+        ->get();
 
-        return view('petugas.laporan.index', compact('laporans', 'status', 'dari_tanggal', 'sampai_tanggal'));
-    }
+    return view('petugas.laporan.index', compact('laporans', 'status', 'dari_tanggal', 'sampai_tanggal'));
+}
 
     // Menampilkan halaman khusus cetak (print preview)
     public function cetakLaporan(Request $request)
@@ -143,7 +144,7 @@ class PetugasController extends Controller
 
         // 3. (Opsional) Tambahkan logika tambah stok alat di sini jika diperlukan
 
-        return redirect()->back()->with('success', 'Pengembalian barang berhasil diproses!');
+        return redirect()->route('petugas.pengembalian.index')->with('success', 'Pengembalian barang berhasil diproses!');
     }
 
     public function formPengembalian($id)
@@ -151,9 +152,29 @@ class PetugasController extends Controller
         // Ambil data peminjaman beserta relasi user dan detail alatnya
         $peminjaman = \App\Models\Peminjaman::with(['user', 'detailPinjams.alat'])->findOrFail($id);
         
-        // Arahkan ke file view/blade form baru
-        return view('petugas.pengembalian.proses', compact('peminjaman'));
-    }
-    
-    
+        // --- TAMBAHAN LOGIKA DENDA ---
+        $tglSekarang = \Carbon\Carbon::now();
+        
+        // Pastikan nama kolom 'tgl_kembali_plan' sesuai sama yang ada di database lu ya
+        $batasKembali = \Carbon\Carbon::parse($peminjaman->tgl_kembali_plan); 
+        
+        $telatHari = 0;
+        $dendaOtomatis = 0;
+
+        // Cek apakah tanggal sekarang lebih dari tanggal batas kembali
+        if ($tglSekarang->gt($batasKembali)) {
+            $telatHari = $tglSekarang->diffInDays($batasKembali);
+            
+            // Denda per hari, misal Rp 10.000 (Sesuaikan sama aturan sekolah lu)
+            $dendaOtomatis = $telatHari * 10000; 
+        }
+        
+        // Arahkan ke file view/blade dengan mengirim semua variabel yang dibutuhin HTML
+        return view('petugas.pengembalian.proses', compact(
+            'peminjaman', 
+            'tglSekarang', 
+            'telatHari', 
+            'dendaOtomatis'
+        ));
+    }   
 }

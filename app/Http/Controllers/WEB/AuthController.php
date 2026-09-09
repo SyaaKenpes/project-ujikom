@@ -45,6 +45,35 @@ class AuthController extends Controller
     ])->onlyInput('email');
 }
 
+    public function authenticate(Request $request)
+{
+    // 1. Validasi input form
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
+
+    // 2. Cari user berdasarkan email di database
+    $user = User::where('email', $request->email)->first();
+
+    // 3. Jika akun TIDAK ADA di database
+    if (!$user) {
+        return back()->with('error', 'Akun tidak ditemukan. Silakan hubungi Admin atau buat akun baru.');
+    }
+
+    // 4. Jika akun ADA, cek kecocokan password
+    if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        // Login berhasil, buat session baru
+        $request->session()->regenerate();
+        
+        // Arahkan ke dashboard (sesuaikan dengan rute lu)
+        return redirect()->intended('/admin/dashboard'); 
+    }
+
+    // 5. Jika akun ada tapi PASSWORD SALAH
+    return back()->with('error', 'Password yang Anda masukkan salah.');
+}
+
     // Proses Logout
     public function logout(Request $request)
     {
