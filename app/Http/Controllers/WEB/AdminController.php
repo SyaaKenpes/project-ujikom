@@ -37,7 +37,7 @@ class AdminController extends Controller
         // 3. Hitung Data untuk Stats Cards
         $totalAlat = Alat::count();
         $peminjamanAktif = Peminjaman::where('status', 'dipinjam')->count(); 
-        $totalPending = Peminjaman::where('status', 'pending')->count();
+        $totalPending = Peminjaman::where('status', 'diajukan')->count();
         $alatRusak = Alat::where('status_kondisi', 'rusak')->count();
         $totalUser = User::count();
 

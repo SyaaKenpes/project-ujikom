@@ -50,16 +50,17 @@ class PengembalianController extends Controller
         $peminjaman = Peminjaman::with('user', 'detailPinjams.alat')->findOrFail($id);
     
         // Hitung telat dan denda otomatis
-        $tglRencana = \Carbon\Carbon::parse($peminjaman->tgl_kembali_plan);
-        $tglSekarang = \Carbon\Carbon::now();
-    
+
+        $tglRencana = \Carbon\Carbon::parse($peminjaman->tgl_kembali_plan)->startOfDay();
+        $tglSekarang = \Carbon\Carbon::now()->startOfDay();
+
         $telatHari = 0;
         $dendaOtomatis = 0;
-    
-        if ($tglSekarang->greaterThan($tglRencana)) {
-            $telatHari = $tglRencana->diffInDays($tglSekarang); 
-            $dendaOtomatis = $telatHari * 2000; // Contoh: Denda Rp 2.000 per hari telat
-        }
+
+            if ($tglSekarang->greaterThan($tglRencana)) {
+        $telatHari = (int) $tglRencana->diffInDays($tglSekarang);
+        $dendaOtomatis = $telatHari * 2000; // Sesuaikan tarif denda per hari
+    }
 
     return view('admin.pengembalian.create', compact('peminjaman', 'telatHari', 'dendaOtomatis', 'tglSekarang'));
     }
