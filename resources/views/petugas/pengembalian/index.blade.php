@@ -91,6 +91,7 @@
                             <td colspan="6" class="py-6 text-center text-gray-500">Tidak ada peminjaman yang sedang aktif
                                 saat ini.</td>
                         </tr>
+                        
                     @endforelse
                 </tbody>
             </table>
