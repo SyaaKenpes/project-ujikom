@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard Admin')</title>
+    <title>@yield('title', 'Dashboard GearHub')</title>
     <!-- Memuat Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -145,6 +145,28 @@
                                 </path>
                             </svg>
                             Cetak Laporan
+                        </a>
+
+                        <!-- Menu khusus peminjam -->
+                    @elseif (auth()->user()->role === 'peminjam')
+                        <a href="{{ route('peminjam.katalog.index') }}"
+                            class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('peminjam.katalog.*') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
+                            <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            Katalog Alat
+                        </a>
+
+                        <a href="{{ route('peminjam.riwayat.index') }}"
+                            class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('peminjam.riwayat.*') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
+                            <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Riwayat Peminjaman
                         </a>
                     @endif
                 </nav>
