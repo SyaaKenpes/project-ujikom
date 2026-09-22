@@ -109,7 +109,7 @@ class AdminController extends Controller
             'aktivitas' => 'Menambahkan alat baru: ' . $validatedData['nama_alat']
         ]);
 
-        return redirect()->back()->with('success', 'Alat berhasil ditambahkan.');
+        return redirect()->route('admin.alat.index')->with('success', 'Alat berhasil ditambahkan.');
     }
 
     
@@ -159,20 +159,33 @@ class AdminController extends Controller
         return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil diperbarui.');
     }
 
-    // 5. Menghapus ata alat
+    // 5. Menghapus data alat
     public function destroyAlat($id) {
-        $alat = Alat::findOrFail($id);
+    $alat = Alat::findOrFail($id);
 
+    // --- 1. CEK STATUS PEMINJAMAN ---
+    $sedangDipinjam = \Illuminate\Support\Facades\DB::table('detail_pinjam')
+    ->join('peminjaman', 'detail_pinjam.peminjaman_id', '=', 'peminjaman.id')
+    ->where('detail_pinjam.alat_id', $id)
+    ->where('peminjaman.status', 'Dipinjam')
+    ->exists();
 
-        // Hapus file gambar fisik jika ada
-        if ($alat->gambar && file_exists(public_path($alat->gambar))) {
-            unlink(public_path($alat->gambar));
-        }
-
-        $alat->delete();
-
-        return redirect()->route('admin.alat.index')->with('success', 'data alat berhasil di hapus. ');
+    if ($sedangDipinjam) {
+        return redirect()->back()->with('error', 'Gagal menghapus! Alat masih dalam status dipinjam oleh user.');
     }
+    // --- AKHIR CEK STATUS ---
+
+
+    // --- 2. HAPUS DATA (JIKA AMAN) ---
+    // Hapus file gambar fisik jika ada
+    if ($alat->gambar && file_exists(public_path($alat->gambar))) {
+        unlink(public_path($alat->gambar));
+    }
+
+    $alat->delete();
+
+    return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil dihapus.');
+}
 
     // CRUD User (Manajemen User Admin, Petugas, Peminjam)
     public function indexUser(Request $request)
