@@ -11,17 +11,6 @@
         <form action="{{ route('petugas.laporan.index') }}" method="GET"
             class="p-5 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Status Peminjaman:</label>
-                <select name="status"
-                    class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="">Semua Status</option>
-                    <option value="diajukan" {{ request('status') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
-                    <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipilip</option>
-                    <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                    <option value="telat" {{ request('status') == 'telat' ? 'selected' : '' }}>Telat</option>
-                </select>
-            </div>
-            <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">Dari Tanggal (Pinjam):</label>
                 <input type="date" name="dari_tanggal" value="{{ request('dari_tanggal') }}"
                     class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500">
@@ -97,7 +86,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-6 text-center text-gray-500">Tidak ada data pilip yang sesuai filter.
+                            <td colspan="7" class="py-6 text-center text-gray-500">Tidak ada data yang sesuai filter.
                             </td>
                         </tr>  
                     @endforelse

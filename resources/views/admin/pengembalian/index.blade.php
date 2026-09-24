@@ -53,8 +53,7 @@
                                 <td class="py-4 px-6 text-center">
                                     <a href="{{ route('admin.pengembalian.create', $item->id) }}"
                                         class="inline-flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ease-in-out hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95">
-
-                                        Proses Kembalikan
+                                        Proses Pengembalian
                                     </a>
                                 </td>
                             </tr>

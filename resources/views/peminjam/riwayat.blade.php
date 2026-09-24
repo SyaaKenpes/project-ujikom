@@ -7,13 +7,6 @@
 
     <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-gray-800">Daftar Transaksi</h2>
-        <a href="{{ route('peminjam.katalog.index') }}" 
-            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2 shadow">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Pinjam Alat Baru
-        </a>
     </div>
 
     @if(session('success'))
