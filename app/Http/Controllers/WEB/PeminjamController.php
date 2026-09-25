@@ -31,40 +31,47 @@ class PeminjamController extends Controller
     }
 
     // 2. Submit Pengajuan Peminjaman
-    public function storePengajuan(Request $request)
-    {
-        $request->validate([
-            'tgl_kembali_plan' => 'required|date|after_or_equal:today',
-            'alat_id' => 'required|array',
-            'jumlah' => 'required|array',
+public function storePengajuan(Request $request)
+{
+    // 1. Tambahin pesan peringatan custom di parameter kedua validate()
+    $request->validate([
+        'tgl_kembali_plan' => 'required|date|after_or_equal:today',
+        'alat_id'          => 'required|array|min:1', 
+        'jumlah'           => 'array',
+    ], [
+        // Daftar pesan error yang bakal muncul di layar
+        'tgl_kembali_plan.required'       => 'Tanggal rencana pengembalian wajib diisi!',
+        'tgl_kembali_plan.after_or_equal' => 'Tanggal pengembalian tidak boleh lewat dari hari ini.',
+        'alat_id.required'                => 'Pilih minimal 1 alat yang ingin dipinjam (centang kotaknya)!',
+        'alat_id.min'                     => 'Pilih minimal 1 alat yang ingin dipinjam (centang kotaknya)!',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $peminjaman = Peminjaman::create([
+            'user_id' => auth()->id(),
+            'tgl_pinjam' => now(),
+            'tgl_kembali_plan' => $request->tgl_kembali_plan,
+            'status' => 'diajukan',
         ]);
 
-        DB::beginTransaction();
-        try {
-            $peminjaman = Peminjaman::create([
-                'user_id' => auth()->id(),
-                'tgl_pinjam' => now(),
-                'tgl_kembali_plan' => $request->tgl_kembali_plan,
-                'status' => 'diajukan',
-            ]);
-
-            foreach ($request->alat_id as $index => $alatId) {
-                if (isset($request->jumlah[$index]) && $request->jumlah[$index] > 0) {
-                    DetailPinjam::create([
-                        'peminjaman_id' => $peminjaman->id,
-                        'alat_id' => $alatId,
-                        'jumlah' => $request->jumlah[$index],
-                    ]);
-                }
+        foreach ($request->alat_id as $index => $alatId) {
+            if (isset($request->jumlah[$index]) && $request->jumlah[$index] > 0) {
+                DetailPinjam::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'alat_id' => $alatId,
+                    'jumlah' => $request->jumlah[$index],
+                ]);
             }
-
-            DB::commit();
-            return redirect()->route('peminjam.riwayat.index')->with('success', 'Pengajuan peminjaman berhasil dikirim.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Gagal mengajukan peminjaman: ' . $e->getMessage());
         }
+
+        DB::commit();
+        return redirect()->route('peminjam.riwayat.index')->with('success', 'Pengajuan peminjaman berhasil dikirim.');
+    } catch (\Exception $e) {
+        DB::rollback();
+        return redirect()->back()->with('error', 'Gagal mengajukan peminjaman: ' . $e->getMessage());
     }
+}
 
     // 3. Riwayat Peminjaman
     public function indexRiwayat()
