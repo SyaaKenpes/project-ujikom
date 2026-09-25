@@ -5,7 +5,30 @@
 @section('content')
     <div class="p-6">
         <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            <!-- Notifikasi Sukses -->
+            @if (session('success'))
+                <div
+                    class="mb-5 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-md shadow-sm flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <p class="font-medium text-sm">{{ session('success') }}</p>
+                </div>
+            @endif
 
+            <!-- Notifikasi Error (Buat jaga-jaga kalau gagal hapus) -->
+            @if (session('error'))
+                <div
+                    class="mb-5 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    <p class="font-medium text-sm">{{ session('error') }}</p>
+                </div>
+            @endif
+            
             <!-- Header Card: Judul (Kiri) & Form Cari + Tombol Tambah (Kanan) -->
             <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h2 class="text-lg font-semibold text-gray-800">Daftar Pengguna Sistem</h2>

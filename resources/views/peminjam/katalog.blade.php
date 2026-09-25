@@ -20,7 +20,6 @@
                         Filter Kategori
                     </label>
 
-                    <!-- Tambahin onchange="this.form.submit()" di sini -->
                     <select name="kategori_id" id="kategori_id" onchange="this.form.submit()"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer">
                         <option value="">Semua Kategori</option>
@@ -36,9 +35,8 @@
         </div>
 
         <!-- BAGIAN 2: FORM PENGAJUAN PINJAM -->
-        <form action="{{ route('peminjam.peminjaman.store') }}" method="POST">
+        <form action="{{ route('peminjam.peminjaman.store') }}" method="POST" onsubmit="return confirm('Yakin ingin mengajukan peminjaman sekarang? Pastikan alat dan tanggal sudah benar.')">
             @csrf
-
 
             {{-- Alert Error Validasi Laravel --}}
             @if ($errors->any())
@@ -58,9 +56,9 @@
                     </ul>
                 </div>
             @endif
+
             <!-- Top Card: Form Rencana Pengembalian & Submit Button -->
-            <div
-                class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="w-full md:w-1/2">
                     <label for="tgl_kembali_plan" class="block text-sm font-semibold text-gray-700 mb-1">
                         Rencana Tanggal Pengembalian
@@ -83,60 +81,74 @@
             <!-- Grid Daftar Alat -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
                 @forelse($alats as $alat)
-                    <div
-                        class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between p-4 hover:shadow-md transition">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between p-4 hover:shadow-md transition {{ $alat->stok == 0 ? 'opacity-75' : '' }}">
                         <div>
                             <!-- AREA FOTO BARANG -->
-                            <div
-                                class="w-full h-40 bg-gray-100 rounded-lg mb-3 overflow-hidden border border-gray-200 flex items-center justify-center">
+                            <div class="w-full h-40 bg-gray-100 rounded-lg mb-3 overflow-hidden border border-gray-200 flex items-center justify-center relative">
                                 @if ($alat->gambar)
-                                    <img src="{{ asset($alat->gambar) }}" alt="{{ $alat->nama_alat }}"
-                                        class="w-full h-full object-cover">
+                                    <img src="{{ asset($alat->gambar) }}" alt="{{ $alat->nama_alat }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="text-xs text-gray-400 font-medium">Tidak ada foto</span>
+                                @endif
+                                
+                                <!-- Label Overlay kalau habis (Opsional, biar makin jelas) -->
+                                @if($alat->stok == 0)
+                                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                        <span class="bg-red-500 text-white font-bold text-xs px-3 py-1.5 rounded-md transform -rotate-12">HABIS</span>
+                                    </div>
                                 @endif
                             </div>
 
                             <!-- BADGE KATEGORI & KONDISI -->
                             <div class="flex items-center justify-between mb-2">
-                                <span
-                                    class="text-[11px] font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-md truncate max-w-[60%]">
+                                <span class="text-[11px] font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-md truncate max-w-[60%]">
                                     {{ $alat->kategori->nama_kategori ?? 'Umum' }}
                                 </span>
 
-                                <!-- Bikin warna kondisi dinamis (Hijau buat baik, Merah buat rusak, dll) -->
+                                <!-- Perbaikan Kode Kondisi -->
                                 @php
-                                    $kondisi = strtolower($alat->kondisi);
-                                    $color =
-                                        $kondisi == 'baik'
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : ($kondisi == 'rusak'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-blue-50 text-blue-600');
+                                    // Ambil nilai kondisi, kalau null jadikan 'Normal'
+                                    $kondisi_asli = $alat->kondisi ?: 'Normal'; 
+                                    $kondisi_lower = strtolower($kondisi_asli);
+                                    
+                                    if ($kondisi_lower == 'baik' || $kondisi_lower == 'normal') {
+                                        $color = 'bg-emerald-100 text-emerald-700';
+                                    } elseif ($kondisi_lower == 'rusak') {
+                                        $color = 'bg-red-100 text-red-700';
+                                    } else {
+                                        $color = 'bg-blue-50 text-blue-600';
+                                    }
                                 @endphp
                                 <span class="text-[11px] font-bold px-2 py-1 rounded-md {{ $color }}">
-                                    {{ ucfirst($alat->kondisi) }}
+                                    {{ ucfirst($kondisi_asli) }}
                                 </span>
                             </div>
 
                             <!-- INFO ALAT -->
                             <h3 class="text-sm font-bold text-gray-800 mb-1 leading-tight">{{ $alat->nama_alat }}</h3>
-                            <p class="text-xs text-gray-500 mb-4">Stok Tersedia: <strong
-                                    class="text-gray-800 text-sm">{{ $alat->stok }}</strong></p>
+                            
+                            <!-- PERUBAHAN STOK -->
+                            @if($alat->stok > 0)
+                                <p class="text-xs text-gray-500 mb-4">Stok Tersedia: <strong class="text-gray-800 text-sm">{{ $alat->stok }}</strong></p>
+                            @else
+                                <p class="text-xs font-bold text-red-500 mb-4">Habis!</p>
+                            @endif
                         </div>
 
+                        <!-- PERUBAHAN DISABLE CHECKBOX & INPUT -->
                         <div class="pt-4 border-t border-gray-100 space-y-3">
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <label class="flex items-center gap-2 {{ $alat->stok == 0 ? 'cursor-not-allowed' : 'cursor-pointer' }} select-none">
                                 <input type="checkbox" name="alat_id[]" value="{{ $alat->id }}"
-                                    class="alat-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                    data-target="#jumlah_{{ $alat->id }}">
-                                <span class="text-sm font-semibold text-gray-700">Pilih Alat Ini</span>
+                                    class="alat-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 disabled:bg-gray-200"
+                                    data-target="#jumlah_{{ $alat->id }}"
+                                    {{ $alat->stok == 0 ? 'disabled' : '' }}>
+                                <span class="text-sm font-semibold {{ $alat->stok == 0 ? 'text-gray-400' : 'text-gray-700' }}">Pilih Alat Ini</span>
                             </label>
 
                             <div>
                                 <label class="block text-xs text-gray-500 mb-1">Jumlah Dipinjam</label>
-                                <input type="number" name="jumlah[]" id="jumlah_{{ $alat->id }}" value="1"
-                                    min="1" max="{{ $alat->stok }}" disabled required
+                                <input type="number" name="jumlah[]" id="jumlah_{{ $alat->id }}" value="{{ $alat->stok > 0 ? 1 : 0 }}"
+                                    min="1" max="{{ $alat->stok > 0 ? $alat->stok : 1 }}" disabled required
                                     class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-gray-50 disabled:opacity-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
                         </div>
@@ -148,7 +160,6 @@
                 @endforelse
             </div>
         </form>
-
     </div>
 
     <script>
@@ -161,6 +172,7 @@
                 } else {
                     targetInput.disabled = true;
                     targetInput.classList.add('bg-gray-50');
+                    targetInput.value = 1; // Reset ke 1 kalau di-uncheck
                 }
             });
         });

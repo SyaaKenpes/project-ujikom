@@ -237,39 +237,49 @@ class AdminController extends Controller
     }
 
     // Memperbarui data user
-    public function updateUser(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+public function updateUser(Request $request, $id)
+{
+    $user = User::findOrFail($id);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'role' => 'required|in:admin,petugas,peminjam',
-        ]);
-        $data = [
-            'name'  => $request->name,
-            'email' => $request->email,
-            'role'  => $request->role,
-            'no_hp' => $request->no_hp,
-        ];
+    // Gua tambahin validasi buat no_hp dan password biar datanya konsisten
+    $request->validate([
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|string|email|max:255|unique:users,email,' . $id,
+        'role'     => 'required|in:admin,petugas,peminjam',
+        'no_hp'    => 'nullable|string|max:20', 
+        'password' => 'nullable|string|min:8', // Minimal 8 karakter kalau diisi
+    ]);
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
+    $data = [
+        'name'  => $request->name,
+        'email' => $request->email,
+        'role'  => $request->role,
+        'no_hp' => $request->no_hp,
+    ];
 
-        $user->update($data);
-
-        return redirect()->route('admin.user.index')->with('success', 'Data user berhasil diperbarui.');
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
     }
 
-    // Menghapus user
-    public function destroyUser($id)
-    {
-        $user = User::findOrFail($id);
-        $user->delete();
+    $user->update($data);
 
-        return redirect()->route('admin.user.index')->with('success', 'User berhasil dihapus.');
+    return redirect()->route('admin.user.index')->with('success', 'Data akun pengguna berhasil diperbarui!');
+}
+
+// Menghapus data user
+public function destroyUser($id)
+{
+    $user = User::findOrFail($id);
+    
+    // Fitur keamanan tambahan: Cegah admin menghapus akunnya sendiri yang lagi dipake
+    if (auth()->id() == $id) {
+        return redirect()->route('admin.user.index')->with('error', 'Gagal: Tidak bisa menghapus akun sendiri!');
     }
+
+    $user->delete();
+
+    return redirect()->route('admin.user.index')->with('success', 'Akun pengguna berhasil dihapus dari sistem!');
+}
 
     public function indexKategori(Request $request)
     {
