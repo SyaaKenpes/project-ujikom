@@ -188,20 +188,24 @@ public function prosesPengembalian(Request $request, $id)
 
         // 4. Looping per-barang untuk urus stok dan catat kondisi masing-masing
         foreach ($peminjaman->detailPinjams as $detail) {
-            
-            $statusKondisiItem = $request->kondisi[$detail->id] ?? 'Bagus'; 
-            
-            // Bikin rekap teks buat disimpen ke tabel Pengembalian
-            // Hasilnya misal: "Router Mikrotik (Bagus)"
-            $rekapKondisi[] = $detail->alat->nama_alat . ' (' . $statusKondisiItem . ')';
+    
+    // CUMA PROSES BARANG YANG STATUSNYA DISETUJUI / DI-ACC
+    if ($detail->status === 'disetujui') {
+        
+        $statusKondisiItem = $request->kondisi[$detail->id] ?? 'Bagus'; 
+        
+        // Bikin rekap teks buat disimpen ke tabel Pengembalian
+        // Hasilnya misal: "Router Mikrotik (Bagus)"
+        $rekapKondisi[] = ($detail->alat->nama_alat ?? 'Alat') . ' (' . $statusKondisiItem . ')';
 
-            // LOGIKA STOK: Tambahkan kembali stok HANYA JIKA barang tidak "Hilang"
-            if ($statusKondisiItem !== 'Hilang') {
-                $alat = \App\Models\Alat::findOrFail($detail->alat_id);
-                $alat->stok += $detail->jumlah;
-                $alat->save();
+        // LOGIKA STOK: Tambahkan kembali stok HANYA JIKA barang tidak "Hilang"
+        if ($statusKondisiItem !== 'Hilang' && $statusKondisiItem !== 'hilang') {
+            $alat = \App\Models\Alat::findOrFail($detail->alat_id);
+            $alat->stok += $detail->jumlah;
+            $alat->save();
             }
         }
+    }
 
         // Gabung array rekap jadi satu string dipisah koma
         $stringKondisiKembali = implode(', ', $rekapKondisi);

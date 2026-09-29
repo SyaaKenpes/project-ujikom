@@ -75,7 +75,7 @@
                             </td>
                             <td class="py-3 px-4 border-b">
                                 <ul class="list-disc list-inside space-y-1 text-xs">
-                                    @foreach ($item->detailPinjams as $detail)
+                                    @foreach ($item->detailPinjams->where('status', 'disetujui') as $detail)
                                         <li>{{ $detail->alat->nama_alat ?? '-' }} ({{ $detail->jumlah }})</li>
                                     @endforeach
                                 </ul>
@@ -88,7 +88,7 @@
                         <tr>
                             <td colspan="7" class="py-6 text-center text-gray-500">Tidak ada data yang sesuai filter.
                             </td>
-                        </tr>  
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
