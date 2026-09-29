@@ -73,13 +73,71 @@
                         </td>
                         <td class="py-3 px-4 border-b text-center">
                             @if ($item->status == 'diajukan')
-                                <form action="{{ route('petugas.peminjaman.setujui', $item->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" onclick="return confirm('Setujui peminjaman alat ini?')"
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-semibold transition shadow-sm">
-                                        Setujui
-                                    </button>
-                                </form>
+                                <!-- 1. Tombol Trigger untuk Buka Modal -->
+                                <button type="button"
+                                    onclick="document.getElementById('modal-setujui-{{ $item->id }}').classList.remove('hidden')"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-semibold transition shadow-sm text-sm">
+                                    Setujui
+                                </button>
+
+                                <!-- 2. Modal Pop-Up Tailwind -->
+                                <div id="modal-setujui-{{ $item->id }}"
+                                    class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex justify-center items-center text-left font-normal">
+                                    <div class="relative mx-auto p-5 border w-[32rem] shadow-lg rounded-xl bg-white">
+
+                                        <div class="mt-2">
+                                            <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Verifikasi Persetujuan
+                                                Alat</h3>
+                                            <p class="text-sm text-gray-500 mt-2 mb-4">
+                                                Peminjam: <strong>{{ $item->user->name ?? 'User' }}</strong><br>
+                                                Hilangkan centang jika barang tidak disetujui / stok kurang.
+                                            </p>
+
+                                            <!-- Form Persetujuan -->
+                                            <form action="{{ route('petugas.peminjaman.setujui', $item->id) }}"
+                                                method="POST">
+                                                @csrf
+
+                                                <div class="max-h-60 overflow-y-auto pr-2">
+                                                    @foreach ($item->detailPinjams as $detail)
+                                                        <div
+                                                            class="flex items-center justify-between mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                                            <div class="flex flex-col">
+                                                                <span
+                                                                    class="font-semibold text-gray-800 text-sm">{{ $detail->alat->nama_alat }}</span>
+                                                                <span
+                                                                    class="text-xs {{ $detail->alat->stok < $detail->jumlah ? 'text-red-600 font-bold' : 'text-gray-500' }}">
+                                                                    Diminta: {{ $detail->jumlah }} | Stok:
+                                                                    {{ $detail->alat->stok }}
+                                                                </span>
+                                                            </div>
+
+                                                            <!-- Checkbox Barang -->
+                                                            <input type="checkbox" name="approved_items[]"
+                                                                value="{{ $detail->id }}"
+                                                                class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                                                                {{ $detail->alat->stok >= $detail->jumlah ? 'checked' : '' }}>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
+                                                <!-- Tombol Action Modal -->
+                                                <div class="flex justify-end gap-3 mt-6 pt-3 border-t">
+                                                    <button type="button"
+                                                        onclick="document.getElementById('modal-setujui-{{ $item->id }}').classList.add('hidden')"
+                                                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm font-medium">
+                                                        Batal
+                                                    </button>
+                                                    <button type="submit"
+                                                        class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium shadow-sm">
+                                                        Konfirmasi & Disetujui
+                                                    </button>
+                                                </div>
+                                            </form>
+
+                                        </div>
+                                    </div>
+                                </div>
                             @else
                                 <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded">
                                     {{ ucfirst($item->status) }}

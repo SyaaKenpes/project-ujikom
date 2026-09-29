@@ -31,24 +31,75 @@ class PetugasController extends Controller
     }
 
     // Menyetujui Peminjaman (Mengubah status & mengurangi stok alat)
-    public function setujuiPeminjaman($id)
+    // Menyetujui Peminjaman (Partial Approval + Anti Race Condition)
+    public function setujuiPeminjaman(Request $request, $id)
     {
+        // Validasi array barang yang dicentang dari modal persetujuan
+        $request->validate([
+            'approved_items' => 'nullable|array',
+            'approved_items.*' => 'exists:detail_pinjam,id'
+        ]);
+
         DB::beginTransaction();
         try {
-            $peminjaman = Peminjaman::with('detailPinjams')->findOrFail($id);
-            $peminjaman->update(['status' => 'dipinjam']);
+            $peminjaman = Peminjaman::with('detailPinjams.alat', 'user')->findOrFail($id);
+            $approvedItems = $request->approved_items ?? [];
 
-            // Kurangi stok alat secara otomatis
-            foreach ($peminjaman->detailPinjams as $detail) {
-                $alat = Alat::findOrFail($detail->alat_id);
-                $alat->stok -= $detail->jumlah;
-                $alat->save();
+            // SKENARIO 1: Petugas uncheck semua barang (Otomatis Ditolak)
+            if (empty($approvedItems)) {
+                $peminjaman->update(['status' => 'ditolak']);
+
+                foreach ($peminjaman->detailPinjams as $detail) {
+                    $detail->update(['status' => 'dibatalkan_stok_habis']);
+                }
+
+                \App\Models\LogAktivitas::create([
+                    'user_id' => auth()->id(),
+                    'aktivitas' => 'Petugas menolak peminjaman ID #' . $peminjaman->id . ' (semua barang dibatalkan).'
+                ]);
+
+                DB::commit();
+                return redirect()->back()->with('error', 'Peminjaman ditolak karena tidak ada barang yang disetujui.');
             }
 
+            // SKENARIO 2: Ada barang yang dicentang/disetujui
+            foreach ($peminjaman->detailPinjams as $detail) {
+                
+                // Cek apakah ID detail ini ada di list centang petugas
+                if (in_array($detail->id, $approvedItems)) {
+                    
+                    // Gembok data alat biar gak kena race condition
+                    $alat = Alat::where('id', $detail->alat_id)->lockForUpdate()->firstOrFail();
+
+                    // Cek stok real-time
+                    if ($alat->stok < $detail->jumlah) {
+                        throw new \Exception("Stok alat '{$alat->nama_alat}' tidak mencukupi (Sisa: {$alat->stok}).");
+                    }
+
+                    // Kurangi stok & tandai disetujui
+                    $alat->decrement('stok', $detail->jumlah);
+                    $detail->update(['status' => 'disetujui']);
+
+                } else {
+                    // Kalau gak dicentang, tandai dibatalkan karena stok habis/kosong
+                    $detail->update(['status' => 'dibatalkan_stok_habis']);
+                }
+            }
+
+            // Ubah status transaksi utama jadi dipinjam
+            $peminjaman->update(['status' => 'dipinjam']);
+
+            // Catat log aktivitas petugas
+            \App\Models\LogAktivitas::create([
+                'user_id' => auth()->id(),
+                'aktivitas' => 'Petugas menyetujui peminjaman ID #' . $peminjaman->id . ' atas nama ' . ($peminjaman->user->name ?? 'User')
+            ]);
+
             DB::commit();
-            return redirect()->back()->with('success', 'Peminjaman disetujui dan stok alat dikurangi.');
+            return redirect()->back()->with('success', 'Peminjaman berhasil diproses dan stok telah diperbarui.');
+
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }

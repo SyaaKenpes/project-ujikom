@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignid('peminjaman_id')->constrained('peminjaman')->cascadeOnDelete();
             $table->foreignid('alat_id')->constrained('alat')->cascadeOnDelete();
             $table->integer('jumlah')->default(1);
+            $table->enum('status', ['menunggu', 'disetujui', 'dibatalkan_stok_habis'])->default('menunggu');
             $table->timestamps();
         });
     }
