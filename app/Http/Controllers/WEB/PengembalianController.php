@@ -65,60 +65,62 @@ class PengembalianController extends Controller
     return view('admin.pengembalian.create', compact('peminjaman', 'telatHari', 'dendaOtomatis', 'tglSekarang'));
     }
 
-    public function store(Request $request)
+    public function prosesPengembalian(Request $request, $id)
     {
+        // 1. Validasi input (kondisi sekarang bentuknya array per-barang)
         $request->validate([
-            'peminjaman_id' => 'required|exists:peminjaman,id',
-            'kondisi_kembali' => 'required|string',
-            'denda_kerusakan' => 'nullable|numeric' // Opsi input manual kalau barang rusak
+            'kondisi' => 'required|array',
+            'denda' => 'nullable|numeric', // Denda total sudah dihitung JS di frontend
+            'denda_tambahan' => 'nullable|numeric'
         ]);
 
         DB::beginTransaction();
         try {
-            $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
+            // Ambil data peminjaman berdasarkan ID dari URL
+            $peminjaman = Peminjaman::with(['detailPinjams.alat', 'user'])->findOrFail($id);
             
-            // 1. Logika Hitung Telat & Denda Keterlambatan
-            $tglRencana = Carbon::parse($peminjaman->tgl_kembali_plan);
-            $tglSekarang = Carbon::now();
-            
-            $dendaTelat = 0;
-            // Kalau tanggal sekarang ngelewatin tanggal rencana, berarti telat
-            if ($tglSekarang->greaterThan($tglRencana)) {
-                $telatHari = $tglRencana->diffInDays($tglSekarang);
-                $dendaTelat = $telatHari * 2000;
+            // Ambil total denda dari hidden input
+            $denda = $request->denda ?? 0;
+
+            // 2. Update status peminjaman
+            $peminjaman->update(['status' => 'dikembalikan']);
+
+            $rekapKondisi = [];
+
+            // 3. Looping untuk urus stok dan catat kondisi masing-masing barang
+            foreach ($peminjaman->detailPinjams as $detail) {
+                $statusKondisiItem = $request->kondisi[$detail->id] ?? 'Bagus'; 
+                
+                // Bikin format teks: "Nama Alat (Kondisi)"
+                $rekapKondisi[] = $detail->alat->nama_alat . ' (' . $statusKondisiItem . ')';
+
+                // LOGIKA STOK: Tambahkan stok HANYA JIKA barang tidak "Hilang"
+                if ($statusKondisiItem !== 'Hilang') {
+                    $detail->alat->increment('stok', $detail->jumlah);
+                }
             }
 
-            // Total denda = denda telat otomatis + denda rusak dari form
-            $dendaKerusakan = $request->denda_kerusakan ?? 0;
-            $totalDenda = $dendaTelat + $dendaKerusakan;
+            // Gabungkan array menjadi satu string, dipisah koma
+            $stringKondisiKembali = implode(', ', $rekapKondisi);
 
-            // 2. Simpan Data Pengembalian
+            // 4. Simpan ke tabel Pengembalian
             Pengembalian::create([
                 'peminjaman_id' => $peminjaman->id,
-                'tgl_kembali' => $tglSekarang->toDateString(),
-                'kondisi_kembali' => $request->kondisi_kembali,
-                'denda' => $totalDenda,
-                'petugas_id' => Auth::id(), // ID Admin/Guru yang lagi login
+                'tgl_kembali' => Carbon::now()->toDateString(),
+                'kondisi_kembali' => $stringKondisiKembali,
+                'denda' => $denda,
+                'petugas_id' => Auth::id(),
             ]);
 
-            // 3. Update Status Peminjaman & Balikin Stok
-            $peminjaman->update(['status' => 'dikembalikan']);
-            foreach ($peminjaman->detailPinjams as $detail) {
-                $detail->alat->increment('stok', $detail->jumlah);
-            }
-
-            // 4. Catat aktivitas ke tabel log sistem
+            // 5. Catat Log Aktivitas (Gua rapihin kodingan lu yang sebelumnya nyatet 2x jadi 1x aja)
+            $namaUser = $peminjaman->user->name ?? 'User';
             \App\Models\LogAktivitas::create([
-            'user_id' => Auth::id(),
-            'aktivitas' => 'Memproses pengembalian alat atas nama ' . $peminjaman->user->name . ($totalDenda > 0 ? ' dan mengenakan denda Rp ' . number_format($totalDenda, 0, ',', '.') : '.')
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Memproses pengembalian alat atas nama ' . $namaUser . ($denda > 0 ? ' dengan total denda Rp ' . number_format($denda, 0, ',', '.') : '.')
             ]);
 
             DB::commit();
-            \App\Models\LogAktivitas::create([
-                'user_id' => Auth::id(),
-                'aktivitas' => 'Memproses pengembalian alat untuk peminjaman ID #' . $peminjaman->id . ($totalDenda > 0 ? ' dan mengenakan denda Rp ' . number_format($totalDenda, 0, ',', '.') : '.')
-            ]);
-            return redirect()->route('admin.peminjaman.index')->with('success', 'Barang berhasil dikembalikan. Total Denda: Rp ' . number_format($totalDenda, 0, ',', '.'));
+            return redirect()->route('admin.pengembalian.index')->with('success', 'Barang berhasil dikembalikan. Total Denda: Rp ' . number_format($denda, 0, ',', '.'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -149,22 +151,4 @@ class PengembalianController extends Controller
         return view('admin.history', compact('histories', 'startDate', 'endDate'));
     }
 
-    // 2. Modifikasi fungsi cetak PDF biar ngikutin Filter Tanggal
-    public function cetakLaporan(Request $request)
-    {
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-
-        $query = \App\Models\Pengembalian::with(['peminjaman.user', 'petugas'])->latest();
-
-        if ($startDate && $endDate) {
-            $query->whereBetween('tgl_kembali', [$startDate, $endDate]);
-        }
-
-        // Kalau cetak PDF gak usah di-paginate, get() semuanya sesuai filter
-        $riwayatKembali = $query->get();
-        
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.laporan_pdf', compact('riwayatKembali'));
-        return $pdf->download('laporan-peminjaman.pdf');
-    }
 }

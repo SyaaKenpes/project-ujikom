@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Admin - Sistem Peminjaman')
+@section('title', 'Kelola User - Sistem Peminjaman')
 @section('header-title', 'Ringkasan Aktivitas Sistem')
 
 @section('content')

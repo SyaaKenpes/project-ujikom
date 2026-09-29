@@ -111,48 +111,61 @@ class PetugasController extends Controller
         return view('petugas.laporan.cetak', compact('laporans', 'status', 'dari_tanggal', 'sampai_tanggal'));
     }
 
-    public function prosesPengembalian(Request $request, $id)
+public function prosesPengembalian(Request $request, $id)
 {
-    // Validasi input dari form
+    // 1. Validasi input dari form baru
     $request->validate([
-        'kondisi_kembali' => 'required|string',
-        'denda' => 'nullable' 
+        'kondisi' => 'required|array', 
+        'denda' => 'nullable|numeric', 
+        'denda_tambahan' => 'nullable|numeric'
     ]);
 
     DB::beginTransaction();
     try {
-        // 1. Ambil data peminjaman beserta relasi detail alatnya
-        $peminjaman = \App\Models\Peminjaman::with('detailPinjams')->findOrFail($id);
+        // 2. Ambil data peminjaman beserta relasi detail alatnya
+        $peminjaman = \App\Models\Peminjaman::with('detailPinjams.alat')->findOrFail($id);
 
-        // Bersihkan format denda (misal dari "120.000" jadi 120000)
-        $denda = 0;
-        if ($request->denda) {
-            $denda = str_replace('.', '', $request->denda);
-        }
+        // Ambil total denda (sudah digabung semua oleh JavaScript)
+        $denda = $request->denda ?? 0;
 
-        // 2. Update status di tabel peminjaman
+        // 3. Update status di tabel peminjaman
         $peminjaman->update([
             'status' => 'Dikembalikan'
         ]);
 
-        // 3. Simpan data ke tabel pengembalian
+        $rekapKondisi = []; // Array buat nampung teks "Nama Alat (Kondisinya)"
+
+        // 4. Looping per-barang untuk urus stok dan catat kondisi masing-masing
+        foreach ($peminjaman->detailPinjams as $detail) {
+            
+            $statusKondisiItem = $request->kondisi[$detail->id] ?? 'Bagus'; 
+            
+            // Bikin rekap teks buat disimpen ke tabel Pengembalian
+            // Hasilnya misal: "Router Mikrotik (Bagus)"
+            $rekapKondisi[] = $detail->alat->nama_alat . ' (' . $statusKondisiItem . ')';
+
+            // LOGIKA STOK: Tambahkan kembali stok HANYA JIKA barang tidak "Hilang"
+            if ($statusKondisiItem !== 'Hilang') {
+                $alat = \App\Models\Alat::findOrFail($detail->alat_id);
+                $alat->stok += $detail->jumlah;
+                $alat->save();
+            }
+        }
+
+        // Gabung array rekap jadi satu string dipisah koma
+        $stringKondisiKembali = implode(', ', $rekapKondisi);
+
+        // 5. Simpan data ke tabel pengembalian
         \App\Models\Pengembalian::create([
             'peminjaman_id' => $peminjaman->id,
             'tgl_kembali' => now(),
-            'kondisi_kembali' => $request->kondisi_kembali,
+            'kondisi_kembali' => $stringKondisiKembali, // Disimpen sbg: "Alat A (Bagus), Alat B (Rusak)"
             'denda' => $denda,
             'petugas_id' => auth()->id(),
         ]);
 
-        // 4. Tambahkan kembali stok alat sesuai jumlah yang dipinjam
-        foreach ($peminjaman->detailPinjams as $detail) {
-            $alat = \App\Models\Alat::findOrFail($detail->alat_id);
-            $alat->stok += $detail->jumlah;
-            $alat->save();
-        }
-
         DB::commit();
-        return redirect()->route('petugas.pengembalian.index')->with('success', 'Pengembalian barang berhasil diproses dan stok alat bertambah!');
+        return redirect()->route('petugas.pengembalian.index')->with('success', 'Pengembalian barang berhasil diproses!');
 
     } catch (\Exception $e) {
         DB::rollback();

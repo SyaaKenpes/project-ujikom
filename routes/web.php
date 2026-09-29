@@ -51,7 +51,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // CRUD Pengembalian
     Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
     Route::get('/pengembalian/create/{id}', [PengembalianController::class, 'create'])->name('pengembalian.create');
-    Route::post('/pengembalian', [PengembalianController::class, 'store'])->name('pengembalian.store');
+    Route::post('/pengembalian/{id}/proses', [PengembalianController::class, 'store'])->name('pengembalian.proses');
 
     Route::get('/laporan/pdf', [PengembalianController::class, 'cetakLaporan'])->name('laporan.pdf');
     Route::get('/history', [PengembalianController::class, 'history'])->name('history');

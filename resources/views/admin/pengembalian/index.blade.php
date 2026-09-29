@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Kategori - Panel Admin')
+@section('title', 'Kelola Pengembalian - Panel Admin')
 @section('header-title', 'Manajemen Pengembalian')
 
 @section('content')

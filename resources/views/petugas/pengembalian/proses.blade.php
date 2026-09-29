@@ -1,28 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto px-4 py-6 max-w-3xl">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Detail Pengembalian Alat</h2>
 
+            <!-- INFO PEMINJAMAN -->
             <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
                 <div><span class="font-semibold text-gray-600">Peminjam:</span> {{ $peminjaman->user->name ?? '-' }}</div>
                 <div><span class="font-semibold text-gray-600">Tanggal Pinjam:</span> {{ $peminjaman->tgl_pinjam }}</div>
-                <div><span class="font-semibold text-gray-600">Batas Kembali:</span> {{ $peminjaman->tgl_kembali_plan }}
-                </div>
-                <div><span class="font-semibold text-gray-600">Tanggal Hari Ini:</span> {{ $tglSekarang->format('Y-m-d') }}
-                </div>
+                <div><span class="font-semibold text-gray-600">Batas Kembali:</span> {{ $peminjaman->tgl_kembali_plan }}</div>
+                <div><span class="font-semibold text-gray-600">Tanggal Hari Ini:</span> {{ $tglSekarang->format('Y-m-d') }}</div>
             </div>
 
-            <div class="mb-6">
-                <span class="font-semibold text-gray-600 block mb-2">Alat yang Dipinjam:</span>
-                <ul class="list-disc list-inside bg-gray-50 p-3 rounded">
-                    @foreach ($peminjaman->detailPinjams as $detail)
-                        <li>{{ $detail->alat->nama_alat }} ({{ $detail->jumlah }} pcs)</li>
-                    @endforeach
-                </ul>
-            </div>
-
+            <!-- ALERT TELAT -->
             @if ($telatHari > 0)
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                     <strong>Peringatan!</strong> Telat {{ $telatHari }} hari. <br>
@@ -34,37 +25,71 @@
                 </div>
             @endif
 
-            <!-- Action form mengarah ke route proses petugas -->
+            <!-- ACTION FORM -->
             <form action="{{ route('petugas.pengembalian.proses', $peminjaman->id) }}" method="POST">
                 @csrf
-                <!-- Hidden ID tetep disimpen buat jaga-jaga -->
                 <input type="hidden" name="peminjaman_id" value="{{ $peminjaman->id }}">
 
-                <!-- Dropdown Kondisi dengan Harga -->
+                <!-- TABEL ALAT DAN KONDISI PER ITEM -->
                 <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Kondisi Alat Saat Dikembalikan</label>
-                    <select name="kondisi_kembali" id="kondisi_kembali"
-                        class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
-                        <option value="Bagus" data-denda="0">Bagus / Lengkap (Rp 0)</option>
-                        <option value="Lecet" data-denda="10000">Sedikit Rusak / Lecet (Rp 10.000)</option>
-                        <option value="Rusak" data-denda="50000">Rusak (Rp 50.000)</option>
-                        <option value="Hilang" data-denda="100000">Hilang (Rp 100.000)</option>
-                    </select>
+                    <label class="font-semibold text-gray-700 block mb-2">Alat yang Dipinjam & Kondisi:</label>
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700 text-sm">
+                                    <th class="p-3 border-b border-r">Nama Alat</th>
+                                    <th class="p-3 border-b border-r text-center">Jumlah</th>
+                                    <th class="p-3 border-b">Kondisi Saat Dikembalikan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($peminjaman->detailPinjams as $detail)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="p-3 border-b border-r text-sm">{{ $detail->alat->nama_alat }}</td>
+                                        <td class="p-3 border-b border-r text-sm text-center">{{ $detail->jumlah }} pcs</td>
+                                        <td class="p-3 border-b">
+                                            <!-- name array berdasar ID detail -->
+                                            <select name="kondisi[{{ $detail->id }}]" class="kondisi-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" required>
+                                                <option value="Bagus" data-denda="0">Bagus / Lengkap (Rp 0)</option>
+                                                <option value="Lecet" data-denda="10000">Sedikit Rusak / Lecet (Rp 10.000)</option>
+                                                <option value="Rusak" data-denda="50000">Rusak (Rp 50.000)</option>
+                                                <option value="Hilang" data-denda="100000">Hilang (Rp 100.000)</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <!-- Kotak Rincian (Kalkulator Otomatis) -->
+                <!-- INPUT DENDA TAMBAHAN -->
+                <div class="mb-6 w-full md:w-1/2">
+                    <label for="denda_tambahan" class="block text-gray-700 text-sm font-bold mb-2">Denda Lainnya / Tambahan (Opsional)</label>
+                    <div class="flex items-center">
+                        <span class="bg-gray-100 border border-gray-300 px-3 py-2 rounded-l text-gray-600 text-sm">Rp</span>
+                        <input type="number" id="input_denda_tambahan" name="denda_tambahan" value="0" min="0" class="w-full border border-gray-300 rounded-r px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">*Isi jika ada denda khusus. Biarkan 0 jika tidak ada.</p>
+                </div>
+
+                <!-- RINCIAN TOTAL DENDA -->
                 <div class="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <h3 class="font-bold text-gray-700 mb-3 border-b pb-2">Rincian Total Denda</h3>
 
                     <div class="flex justify-between mb-2 text-sm text-gray-600">
                         <span>Denda Keterlambatan ({{ $telatHari }} hari)</span>
-                        <span id="teks-denda-telat" data-telat="{{ $dendaOtomatis }}">Rp
-                            {{ number_format($dendaOtomatis, 0, ',', '.') }}</span>
+                        <span id="teks-denda-telat" data-telat="{{ $dendaOtomatis }}">Rp {{ number_format($dendaOtomatis, 0, ',', '.') }}</span>
                     </div>
 
                     <div class="flex justify-between mb-2 text-sm text-gray-600">
-                        <span>Denda Kondisi Barang (<span id="label-kondisi">Bagus</span>)</span>
+                        <span>Total Denda Kondisi Barang</span>
                         <span id="teks-denda-kondisi">Rp 0</span>
+                    </div>
+                    
+                    <div class="flex justify-between mb-2 text-sm text-gray-600">
+                        <span>Denda Tambahan</span>
+                        <span id="teks-denda-tambahan">Rp 0</span>
                     </div>
 
                     <hr class="my-3 border-gray-300">
@@ -75,11 +100,10 @@
                     </div>
                 </div>
 
-                <!-- SUDAH DIUBAH: name="denda" dan value defaultnya ngambil dari $dendaOtomatis -->
+                <!-- HIDDEN INPUT TOTAL DENDA KESELURUHAN -->
                 <input type="hidden" name="denda" id="input-denda" value="{{ $dendaOtomatis }}">
 
                 <div class="flex gap-4">
-                    <!-- Tombol batal balik ke index petugas -->
                     <a href="{{ route('petugas.pengembalian.index') }}"
                         class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-lg text-sm font-semibold transition text-center flex-none w-1/3 text-base pt-2.5">Batal</a>
                     <button type="submit"
@@ -91,43 +115,59 @@
         </div>
     </div>
 
-    <!-- Script Javascript buat Kalkulator Otomatisnya -->
+    <!-- Script Javascript Kalkulator Otomatis -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const selectKondisi = document.getElementById('kondisi_kembali');
+            // Ambil semua dropdown kondisi dan input tambahan
+            const selectKondisis = document.querySelectorAll('.kondisi-select');
+            const inputDendaTambahan = document.getElementById('input_denda_tambahan');
 
+            // Ambil elemen teks untuk diubah
             const teksDendaKondisi = document.getElementById('teks-denda-kondisi');
+            const teksDendaTambahan = document.getElementById('teks-denda-tambahan');
             const teksTotalDenda = document.getElementById('teks-total-denda');
-            const labelKondisi = document.getElementById('label-kondisi');
+            const inputHiddenDenda = document.getElementById('input-denda');
 
-            // SUDAH DIUBAH: Nyari id input-denda
-            const inputDenda = document.getElementById('input-denda');
+            // Ambil denda keterlambatan (statis)
+            const dendaTelat = parseInt(document.getElementById('teks-denda-telat').getAttribute('data-telat')) || 0;
 
-            // Ambil nominal denda telat dari PHP yang udah dirender
-            const dendaTelat = parseInt(document.getElementById('teks-denda-telat').getAttribute('data-telat')) ||
-            0;
-
-            // Fungsi biar angkanya jadi format Rupiah (contoh: 50000 -> Rp 50.000)
+            // Format Rupiah function
             const formatRupiah = (angka) => {
                 return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             };
 
-            // Pas dropdown diganti, fungsi ini jalan
-            selectKondisi.addEventListener('change', function() {
-                const kondisi = this.options[this.selectedIndex].value;
-                const dendaKondisi = parseInt(this.options[this.selectedIndex].getAttribute('data-denda'));
+            // Fungsi utama hitung total
+            function hitungTotal() {
+                let totalDendaKondisi = 0;
 
-                // Kalkulasi total
-                const totalSemua = dendaTelat + dendaKondisi;
+                // Loop setiap dropdown barang yang dipilih
+                selectKondisis.forEach(function(select) {
+                    const dendaPerBarang = parseInt(select.options[select.selectedIndex].getAttribute('data-denda')) || 0;
+                    totalDendaKondisi += dendaPerBarang;
+                });
 
-                // Update text di layar
-                labelKondisi.innerText = kondisi;
-                teksDendaKondisi.innerText = formatRupiah(dendaKondisi);
-                teksTotalDenda.innerText = formatRupiah(totalSemua);
+                // Ambil denda manual
+                let dendaTambahan = parseInt(inputDendaTambahan.value);
+                if (isNaN(dendaTambahan)) { dendaTambahan = 0; }
 
-                // SUDAH DIUBAH: Update value di input hidden buat dikirim ke Controller pake totalSemua
-                inputDenda.value = totalSemua;
-            });
+                // Hitung grand total
+                const grandTotal = dendaTelat + totalDendaKondisi + dendaTambahan;
+
+                // Update text di HTML
+                teksDendaKondisi.innerText = formatRupiah(totalDendaKondisi);
+                teksDendaTambahan.innerText = formatRupiah(dendaTambahan);
+                teksTotalDenda.innerText = formatRupiah(grandTotal);
+
+                // Update hidden input untuk dikirim ke Controller
+                inputHiddenDenda.value = grandTotal;
+            }
+
+            // Panggil hitungTotal tiap kali dropdown diubah atau input tambahan diketik
+            selectKondisis.forEach(select => select.addEventListener('change', hitungTotal));
+            inputDendaTambahan.addEventListener('input', hitungTotal);
+            
+            // Panggil sekali pas halaman baru beres loading (biar default nolnya ke-set)
+            hitungTotal();
         });
     </script>
 @endsection
