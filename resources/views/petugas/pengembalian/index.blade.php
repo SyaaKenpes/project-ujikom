@@ -69,13 +69,14 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 border-b">
-                                <ul class="list-disc list-inside space-y-1 text-xs">
+                                <ul class="list-disc pl-4 text-sm">
                                     @foreach ($item->detailPinjams as $detail)
-                                        <li>
-                                            <span
-                                                class="font-semibold">{{ $detail->alat->nama_alat ?? 'Alat Dihapus' }}</span>
-                                            (Jumlah: {{ $detail->jumlah }})
-                                        </li>
+                                        {{-- TAMPILIN YANG STATUSNYA DISETUJUI / DIPINJAM --}}
+                                        @if (in_array($detail->status, ['disetujui', 'dipinjam']))
+                                            <li>
+                                                {{ $detail->alat->nama_alat }} (Jumlah: {{ $detail->jumlah }})
+                                            </li>
+                                        @endif
                                     @endforeach
                                 </ul>
                             </td>
@@ -91,7 +92,7 @@
                             <td colspan="6" class="py-6 text-center text-gray-500">Tidak ada peminjaman yang sedang aktif
                                 saat ini.</td>
                         </tr>
-                        
+
                     @endforelse
                 </tbody>
             </table>

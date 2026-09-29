@@ -9,8 +9,10 @@
             <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
                 <div><span class="font-semibold text-gray-600">Peminjam:</span> {{ $peminjaman->user->name ?? '-' }}</div>
                 <div><span class="font-semibold text-gray-600">Tanggal Pinjam:</span> {{ $peminjaman->tgl_pinjam }}</div>
-                <div><span class="font-semibold text-gray-600">Batas Kembali:</span> {{ $peminjaman->tgl_kembali_plan }}</div>
-                <div><span class="font-semibold text-gray-600">Tanggal Hari Ini:</span> {{ $tglSekarang->format('Y-m-d') }}</div>
+                <div><span class="font-semibold text-gray-600">Batas Kembali:</span> {{ $peminjaman->tgl_kembali_plan }}
+                </div>
+                <div><span class="font-semibold text-gray-600">Tanggal Hari Ini:</span> {{ $tglSekarang->format('Y-m-d') }}
+                </div>
             </div>
 
             <!-- ALERT TELAT -->
@@ -44,19 +46,21 @@
                             </thead>
                             <tbody>
                                 @foreach ($peminjaman->detailPinjams as $detail)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="p-3 border-b border-r text-sm">{{ $detail->alat->nama_alat }}</td>
-                                        <td class="p-3 border-b border-r text-sm text-center">{{ $detail->jumlah }} pcs</td>
-                                        <td class="p-3 border-b">
-                                            <!-- name array berdasar ID detail -->
-                                            <select name="kondisi[{{ $detail->id }}]" class="kondisi-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" required>
-                                                <option value="Bagus" data-denda="0">Bagus / Lengkap (Rp 0)</option>
-                                                <option value="Lecet" data-denda="10000">Sedikit Rusak / Lecet (Rp 10.000)</option>
-                                                <option value="Rusak" data-denda="50000">Rusak (Rp 50.000)</option>
-                                                <option value="Hilang" data-denda="100000">Hilang (Rp 100.000)</option>
-                                            </select>
-                                        </td>
-                                    </tr>
+                                    {{-- FILTER BARANG YANG DI ACC SAJA --}}
+                                    @if (in_array($detail->status, ['disetujui', 'dipinjam']))
+                                        <tr class="border-b">
+                                            <td class="py-2 px-4">{{ $detail->alat->nama_alat }}</td>
+                                            <td class="py-2 px-4 text-center">{{ $detail->jumlah }} pcs</td>
+                                            <td class="py-2 px-4">
+                                                <!-- Ini form select kondisi barang lu yang udah ada -->
+                                                <select name="kondisi[{{ $detail->id }}]" class="...">
+                                                    <option value="bagus">Bagus / Lengkap</option>
+                                                    <option value="rusak">Rusak </option>
+                                                    <option value="hilang">Hilang </option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -65,10 +69,12 @@
 
                 <!-- INPUT DENDA TAMBAHAN -->
                 <div class="mb-6 w-full md:w-1/2">
-                    <label for="denda_tambahan" class="block text-gray-700 text-sm font-bold mb-2">Denda Lainnya / Tambahan (Opsional)</label>
+                    <label for="denda_tambahan" class="block text-gray-700 text-sm font-bold mb-2">Denda Lainnya / Tambahan
+                        (Opsional)</label>
                     <div class="flex items-center">
                         <span class="bg-gray-100 border border-gray-300 px-3 py-2 rounded-l text-gray-600 text-sm">Rp</span>
-                        <input type="number" id="input_denda_tambahan" name="denda_tambahan" value="0" min="0" class="w-full border border-gray-300 rounded-r px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="number" id="input_denda_tambahan" name="denda_tambahan" value="0" min="0"
+                            class="w-full border border-gray-300 rounded-r px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <p class="text-xs text-gray-500 mt-1">*Isi jika ada denda khusus. Biarkan 0 jika tidak ada.</p>
                 </div>
@@ -79,14 +85,15 @@
 
                     <div class="flex justify-between mb-2 text-sm text-gray-600">
                         <span>Denda Keterlambatan ({{ $telatHari }} hari)</span>
-                        <span id="teks-denda-telat" data-telat="{{ $dendaOtomatis }}">Rp {{ number_format($dendaOtomatis, 0, ',', '.') }}</span>
+                        <span id="teks-denda-telat" data-telat="{{ $dendaOtomatis }}">Rp
+                            {{ number_format($dendaOtomatis, 0, ',', '.') }}</span>
                     </div>
 
                     <div class="flex justify-between mb-2 text-sm text-gray-600">
                         <span>Total Denda Kondisi Barang</span>
                         <span id="teks-denda-kondisi">Rp 0</span>
                     </div>
-                    
+
                     <div class="flex justify-between mb-2 text-sm text-gray-600">
                         <span>Denda Tambahan</span>
                         <span id="teks-denda-tambahan">Rp 0</span>
@@ -129,7 +136,8 @@
             const inputHiddenDenda = document.getElementById('input-denda');
 
             // Ambil denda keterlambatan (statis)
-            const dendaTelat = parseInt(document.getElementById('teks-denda-telat').getAttribute('data-telat')) || 0;
+            const dendaTelat = parseInt(document.getElementById('teks-denda-telat').getAttribute('data-telat')) ||
+            0;
 
             // Format Rupiah function
             const formatRupiah = (angka) => {
@@ -142,13 +150,16 @@
 
                 // Loop setiap dropdown barang yang dipilih
                 selectKondisis.forEach(function(select) {
-                    const dendaPerBarang = parseInt(select.options[select.selectedIndex].getAttribute('data-denda')) || 0;
+                    const dendaPerBarang = parseInt(select.options[select.selectedIndex].getAttribute(
+                        'data-denda')) || 0;
                     totalDendaKondisi += dendaPerBarang;
                 });
 
                 // Ambil denda manual
                 let dendaTambahan = parseInt(inputDendaTambahan.value);
-                if (isNaN(dendaTambahan)) { dendaTambahan = 0; }
+                if (isNaN(dendaTambahan)) {
+                    dendaTambahan = 0;
+                }
 
                 // Hitung grand total
                 const grandTotal = dendaTelat + totalDendaKondisi + dendaTambahan;
@@ -165,7 +176,7 @@
             // Panggil hitungTotal tiap kali dropdown diubah atau input tambahan diketik
             selectKondisis.forEach(select => select.addEventListener('change', hitungTotal));
             inputDendaTambahan.addEventListener('input', hitungTotal);
-            
+
             // Panggil sekali pas halaman baru beres loading (biar default nolnya ke-set)
             hitungTotal();
         });

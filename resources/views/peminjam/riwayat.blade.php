@@ -33,16 +33,47 @@
                             <td class="px-6 py-4 font-semibold text-gray-500">#{{ $pinjam->id }}</td>
                             <td class="px-6 py-4 text-gray-700">{{ \Carbon\Carbon::parse($pinjam->tgl_pinjam)->format('d M Y, H:i') }}</td>
                             <td class="px-6 py-4 text-gray-700">{{ \Carbon\Carbon::parse($pinjam->tgl_kembali_plan)->format('d M Y') }}</td>
+                            
+                            {{-- KOLOM DETAIL ALAT YANG SUDAH DIUPDATE --}}
                             <td class="px-6 py-4">
-                                <ul class="space-y-1">
+                                <ul class="space-y-1.5 text-sm">
                                     @foreach($pinjam->detailPinjams as $detail)
-                                        <li class="text-gray-800 font-medium">
-                                            • {{ $detail->alat->nama_alat ?? 'Alat Dihapus' }} 
-                                            <span class="text-xs text-gray-500 font-normal">({{ $detail->jumlah }} pcs)</span>
+                                        <li class="flex items-center gap-2 text-gray-800 font-medium">
+                                            <span>
+                                                • {{ $detail->alat->nama_alat ?? 'Alat Dihapus' }} 
+                                                <span class="text-xs text-gray-500 font-normal">({{ $detail->jumlah }} pcs)</span>
+                                            </span>
+                                            
+                                            {{-- STATUS 1: DISETUJUI / ACC (Badge Biru / Ceklis) --}}
+                                            @if($detail->status === 'disetujui')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">
+                                                    <svg class="w-3 h-3 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    ACC
+                                                </span>
+
+                                            {{-- STATUS 2: DITOLAK / STOK HABIS (Badge Merah / Silang) --}}
+                                            @elseif($detail->status === 'dibatalkan_stok_habis' || $detail->status === 'ditolak')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700">
+                                                    <svg class="w-3 h-3 mr-1 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    Ditolak
+                                                </span>
+
+                                            {{-- STATUS 3: MASIH MENUNGGU PERSETUJUAN (Badge Kuning) --}}
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-700">
+                                                    Menunggu
+                                                </span>
+                                            @endif
                                         </li>
                                     @endforeach
                                 </ul>
                             </td>
+
+                            {{-- KOLOM STATUS UTAMA PEMINJAMAN --}}
                             <td class="px-6 py-4">
                                 @php
                                     $st = strtolower($pinjam->status);
