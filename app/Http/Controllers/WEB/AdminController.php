@@ -352,7 +352,7 @@ public function destroyUser($id)
     {
         $kategori = Kategori::findOrFail($id);
 
-        // Opsional: Cek apakah kategori masih dipakai oleh alat
+        // Cek apakah kategori masih dipakai oleh alat
         if ($kategori->alat()->count() > 0) {
             return redirect()->route('admin.kategori.index')
                 ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh data alat.');
@@ -434,7 +434,7 @@ public function destroyUser($id)
             DB::commit();
             return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil diajukan.');
             
-        } catch (\Exception $e) { // <-- Sekarang try-catch nyambung dengan sempurna!
+        } catch (\Exception $e) { 
             DB::rollBack();
             return back()->withInput()->with('error', $e->getMessage());
         }
