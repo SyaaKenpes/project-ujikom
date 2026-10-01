@@ -271,16 +271,25 @@ public function destroyUser($id)
 {
     $user = User::findOrFail($id);
     
-    // Fitur keamanan tambahan: Cegah admin menghapus akunnya sendiri yang lagi dipake
+    // Fitur keamanan 1: Cegah admin menghapus akunnya sendiri yang lagi dipake
     if (auth()->id() == $id) {
         return redirect()->route('admin.user.index')->with('error', 'Gagal: Tidak bisa menghapus akun sendiri!');
     }
 
+    // Fitur keamanan 2: Cegah hapus user yang masih dalam proses peminjaman alat
+    $sedangMinjem = \App\Models\Peminjaman::where('user_id', $id)
+        ->whereIn('status', ['diajukan', 'dipinjam', 'telat']) 
+        ->exists();
+
+    if ($sedangMinjem) {
+        return redirect()->route('admin.user.index')->with('error', 'Gagal: User tidak bisa dihapus karena masih meminjam alat atau ada transaksi aktif!');
+    }
+
+    
     $user->delete();
 
     return redirect()->route('admin.user.index')->with('success', 'Akun pengguna berhasil dihapus dari sistem!');
 }
-
     public function indexKategori(Request $request)
     {
         $search = $request->input('search');
@@ -418,6 +427,7 @@ public function destroyUser($id)
                     'peminjaman_id' => $peminjaman->id,
                     'alat_id'       => $alatId,
                     'jumlah'        => $jumlahPinjam,
+                    'status'        => 'disetujui',
                 ]);
             } 
 
@@ -432,6 +442,7 @@ public function destroyUser($id)
     }
 
     // 4. Memperbarui status peminjaman (Misal: dari diajukan -> dipinjam / selesai)
+    // 4. Memperbarui status peminjaman
     public function updateStatusPeminjaman(Request $request, $id)
     {
         $peminjaman = Peminjaman::with('detailPinjams.alat')->findOrFail($id);
@@ -455,8 +466,10 @@ public function destroyUser($id)
                     }
                     $alat->decrement('stok', $detail->jumlah);
                 }
-            } elseif ($statusLama == 'dipinjam' && ($statusBaru == 'selesai')) {
-                // Kembalikan stok karena barang sudah dikembalikan (selesai)
+            } 
+            // UBAH BAGIAN INI: Ganti 'selesai' jadi 'dikembalikan', dan izinkan dari 'dipinjam' atau 'telat'
+            elseif (($statusLama == 'dipinjam' || $statusLama == 'telat') && $statusBaru == 'dikembalikan') {
+                // Kembalikan stok karena barang sudah dikembalikan
                 foreach ($peminjaman->detailPinjams as $detail) {
                     $detail->alat->increment('stok', $detail->jumlah);
                 }
@@ -464,7 +477,6 @@ public function destroyUser($id)
 
             $peminjaman->update(['status' => $statusBaru]);
             
-            // MASUKIN KE DALAM TRY
             DB::commit();
             return redirect()->route('admin.peminjaman.index')->with('success', 'Status peminjaman berhasil diperbarui.');
             
@@ -472,7 +484,7 @@ public function destroyUser($id)
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
-    } 
+    }
 
     // 5. Menghapus data peminjaman
     public function destroyPeminjaman($id)

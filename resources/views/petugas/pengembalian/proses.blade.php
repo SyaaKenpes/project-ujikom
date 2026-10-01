@@ -53,10 +53,22 @@
                                             <td class="py-2 px-4 text-center">{{ $detail->jumlah }} pcs</td>
                                             <td class="py-2 px-4">
                                                 <!-- Ini form select kondisi barang lu yang udah ada -->
-                                                <select name="kondisi[{{ $detail->id }}]" class="...">
-                                                    <option value="bagus">Bagus / Lengkap</option>
-                                                    <option value="rusak">Rusak </option>
-                                                    <option value="hilang">Hilang </option>
+                                                <select name="kondisi[{{ $detail->id }}]"
+                                                    class="select-kondisi form-select w-full border-gray-300 rounded-md"
+                                                    data-jumlah="{{ $detail->jumlah }}">
+
+                                                    <option value="Bagus" data-denda="0">
+                                                        Bagus / Lengkap (Rp 0)
+                                                    </option>
+                                                    <option value="Sedikit Rusak" data-denda="10000">
+                                                        Sedikit Rusak / Lecet (Rp 10.000)
+                                                    </option>
+                                                    <option value="Rusak" data-denda="50000">
+                                                        Rusak (Rp 50.000)
+                                                    </option>
+                                                    <option value="Hilang" data-denda="100000">
+                                                        Hilang (Rp 100.000)
+                                                    </option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -125,8 +137,8 @@
     <!-- Script Javascript Kalkulator Otomatis -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ambil semua dropdown kondisi dan input tambahan
-            const selectKondisis = document.querySelectorAll('.kondisi-select');
+            // Ambil semua dropdown kondisi dan input tambahan (CLASS SUDAH DIBENARKAN)
+            const selectKondisis = document.querySelectorAll('.select-kondisi');
             const inputDendaTambahan = document.getElementById('input_denda_tambahan');
 
             // Ambil elemen teks untuk diubah
@@ -137,7 +149,7 @@
 
             // Ambil denda keterlambatan (statis)
             const dendaTelat = parseInt(document.getElementById('teks-denda-telat').getAttribute('data-telat')) ||
-            0;
+                0;
 
             // Format Rupiah function
             const formatRupiah = (angka) => {
