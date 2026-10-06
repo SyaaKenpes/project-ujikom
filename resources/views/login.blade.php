@@ -98,7 +98,7 @@
                     </div>
 
                     <p class="text-[11px] text-gray-300 pt-1">
-                        Masukkan email dan password untuk mengakses sistem!
+                        Masukkan email dan password untuk mengakses sistem.
                     </p>
 
                     <!-- Tombol Login (Ditambah hover transform) -->
