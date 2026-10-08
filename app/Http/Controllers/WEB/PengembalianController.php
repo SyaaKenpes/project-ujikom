@@ -90,13 +90,12 @@ class PengembalianController extends Controller
             // 3. Looping untuk urus stok dan catat kondisi masing-masing barang
             foreach ($peminjaman->detailPinjams as $detail) {
     
-    // CUMA PROSES BARANG YANG STATUSNYA DISETUJUI / DI-ACC
+    
     if ($detail->status === 'disetujui') {
         
         $statusKondisiItem = $request->kondisi[$detail->id] ?? 'Bagus'; 
         
-        // Bikin rekap teks buat disimpen ke tabel Pengembalian
-        // Hasilnya misal: "Router Mikrotik (Bagus)"
+        
         $rekapKondisi[] = ($detail->alat->nama_alat ?? 'Alat') . ' (' . $statusKondisiItem . ')';
 
         // LOGIKA STOK: Tambahkan kembali stok HANYA JIKA barang tidak "Hilang"
