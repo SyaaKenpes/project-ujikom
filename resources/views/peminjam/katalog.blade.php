@@ -91,7 +91,7 @@
                                     <span class="text-xs text-gray-400 font-medium">Tidak ada foto</span>
                                 @endif
                                 
-                                <!-- Label Overlay kalau habis (Opsional, biar makin jelas) -->
+                                <!-- Label Overlay kalau habis -->
                                 @if($alat->stok == 0)
                                     <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                                         <span class="bg-red-500 text-white font-bold text-xs px-3 py-1.5 rounded-md transform -rotate-12">HABIS</span>
@@ -105,22 +105,24 @@
                                     {{ $alat->kategori->nama_kategori ?? 'Umum' }}
                                 </span>
 
-                                <!-- Perbaikan Kode Kondisi -->
+                                <!-- PERBAIKAN: Mengambil data dari kolom status_kondisi -->
                                 @php
-                                    // Ambil nilai kondisi, kalau null jadikan 'Normal'
-                                    $kondisi_asli = $alat->kondisi ?: 'Normal'; 
+                                    $kondisi_asli = $alat->status_kondisi ?: 'Baik'; 
                                     $kondisi_lower = strtolower($kondisi_asli);
                                     
                                     if ($kondisi_lower == 'baik' || $kondisi_lower == 'normal') {
                                         $color = 'bg-emerald-100 text-emerald-700';
+                                        $kondisi_tampil = 'Baik'; // Ubah teks normal jadi baik sesuai permintaan
                                     } elseif ($kondisi_lower == 'rusak') {
                                         $color = 'bg-red-100 text-red-700';
+                                        $kondisi_tampil = ucfirst($kondisi_asli);
                                     } else {
                                         $color = 'bg-blue-50 text-blue-600';
+                                        $kondisi_tampil = ucfirst($kondisi_asli);
                                     }
                                 @endphp
                                 <span class="text-[11px] font-bold px-2 py-1 rounded-md {{ $color }}">
-                                    {{ ucfirst($kondisi_asli) }}
+                                    {{ $kondisi_tampil }}
                                 </span>
                             </div>
 
@@ -135,19 +137,25 @@
                             @endif
                         </div>
 
-                        <!-- PERUBAHAN DISABLE CHECKBOX & INPUT -->
+                        <!-- DISABLE CHECKBOX & INPUT JIKA RUSAK / HABIS -->
                         <div class="pt-4 border-t border-gray-100 space-y-3">
-                            <label class="flex items-center gap-2 {{ $alat->stok == 0 ? 'cursor-not-allowed' : 'cursor-pointer' }} select-none">
+                            @php
+                                $isDisabled = ($alat->stok == 0 || $kondisi_lower == 'rusak');
+                            @endphp
+                            
+                            <label class="flex items-center gap-2 {{ $isDisabled ? 'cursor-not-allowed' : 'cursor-pointer' }} select-none">
                                 <input type="checkbox" name="alat_id[]" value="{{ $alat->id }}"
                                     class="alat-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 disabled:bg-gray-200"
                                     data-target="#jumlah_{{ $alat->id }}"
-                                    {{ $alat->stok == 0 ? 'disabled' : '' }}>
-                                <span class="text-sm font-semibold {{ $alat->stok == 0 ? 'text-gray-400' : 'text-gray-700' }}">Pilih Alat Ini</span>
+                                    {{ $isDisabled ? 'disabled' : '' }}>
+                                <span class="text-sm font-semibold {{ $isDisabled ? 'text-gray-400' : 'text-gray-700' }}">
+                                    {{ $kondisi_lower == 'rusak' ? 'Barang Rusak' : 'Pilih Alat Ini' }}
+                                </span>
                             </label>
 
                             <div>
                                 <label class="block text-xs text-gray-500 mb-1">Jumlah Dipinjam</label>
-                                <input type="number" name="jumlah[]" id="jumlah_{{ $alat->id }}" value="{{ $alat->stok > 0 ? 1 : 0 }}"
+                                <input type="number" name="jumlah[]" id="jumlah_{{ $alat->id }}" value="{{ !$isDisabled ? 1 : 0 }}"
                                     min="1" max="{{ $alat->stok > 0 ? $alat->stok : 1 }}" disabled required
                                     class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-gray-50 disabled:opacity-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
