@@ -111,8 +111,7 @@
 
             <div class="mt-8 text-center text-xs">
                 <p class="text-gray-300">Belum punya akun?</p>
-                <a href="#" class="text-sky-300 hover:text-sky-200 font-medium transition underline">Hubungi
-                    Admin</a>
+                <a href="{{ route('auth.register') }}" class="text-sky-300 hover:text-sky-200 font-medium transition underline">Register</a>
             </div>
         </div>
 

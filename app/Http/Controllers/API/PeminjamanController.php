@@ -17,7 +17,7 @@ class PeminjamanController extends Controller
 {
     public function index(): JsonResponse
     {
-        $user = auth()->user();
+        $user = auth()->user;
         $query = Peminjaman::with(['user', 'detailPinjam.alat', 'pengembalian']);
 
         if ($user->role === 'peminjam') {
@@ -188,7 +188,7 @@ class PeminjamanController extends Controller
     public function riwayat() : JsonResponse
     {
         $riwayat = Peminjaman::with(['detailpinjam.alat', 'pengembalian'])
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth()->id)
             ->latest()
             ->get();
 

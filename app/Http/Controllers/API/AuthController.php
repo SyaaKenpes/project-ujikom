@@ -5,7 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller; 
 use App\Http\Requests\Auth\LoginRequest; 
 use App\Http\Requests\Auth\RegisterRequest; 
-use App\Http\Resources\UserResource; 
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User; 
 use Illuminate\Http\JsonResponse; 
 use Illuminate\Http\Request;
@@ -71,13 +72,13 @@ class AuthController extends Controller
     {
         return response()->json([
             'message' => 'Data profil berhasil diambil.',
-            'data' => new UserResource(auth()->user()),
+            'data' => new UserResource(auth::user()),
         ]);
     }
 
     public function logout(): JsonResponse
     {
-        auth()->user()->currentAccessToken()->delete();
+        auth::user()->currentAccessToken::delete();
         
         return response()->json([
             'message' => 'Logout berhasil. Token telah dihapus.',

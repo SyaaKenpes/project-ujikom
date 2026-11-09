@@ -7,9 +7,13 @@ use App\Http\Controllers\WEB\PeminjamController;
 use App\Http\Controllers\WEB\AuthController;
 use App\Http\Controllers\WEB\PengembalianController;
 
+
 Route::get('/', function () {
     return view('login');
 });
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
+Route::post('/register', [AuthController::class, 'storeRegister']);
 
 // ==========================================
 // ADMIN ROUTES

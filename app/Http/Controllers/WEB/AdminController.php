@@ -105,7 +105,7 @@ class AdminController extends Controller
 
         // 2. Catat Log Aktivitas
         LogAktivitas::create([
-            'user_id'   => auth()->id(),
+            'user_id'   => auth()->id,
             'aktivitas' => 'Menambahkan alat baru: ' . $validatedData['nama_alat']
         ]);
 
@@ -272,7 +272,7 @@ public function destroyUser($id)
     $user = User::findOrFail($id);
     
     // Fitur keamanan 1: Cegah admin menghapus akunnya sendiri yang lagi dipake
-    if (auth()->id() == $id) {
+    if (auth()->id == $id) {
         return redirect()->route('admin.user.index')->with('error', 'Gagal: Tidak bisa menghapus akun sendiri!');
     }
 

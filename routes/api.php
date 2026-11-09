@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\KategoriController;
 use App\Http\Controllers\API\AlatController;
+use App\Http\Controllers\API\PeminjamanController;
+use App\Http\Controllers\API\PengembalianController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LogAktivitasController;
 use App\Http\Controllers\API\LaporanController;
 // Public Routes (Tidak perlu token) 
