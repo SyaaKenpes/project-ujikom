@@ -1,7 +1,7 @@
 # Peminjaman Alat API
 
 REST API peminjaman alat berbasis **Laravel (PHP 8.4)** + **MySQL 8.0**, dijalankan dengan **Docker Compose**.
-Dibuat untuk keperluan Uji Kompetensi (UKOM) — Dafa Faturahman Shidiq.
+Dibuat untuk keperluan Uji Kompetensi (UKOM) — Pasyha Zulfahmi Rochmat.
 
 ---
 
@@ -21,25 +21,25 @@ Dibuat untuk keperluan Uji Kompetensi (UKOM) — Dafa Faturahman Shidiq.
 
 | Service (`docker compose`) | Container | Port | Fungsi |
 |---|---|---|---|
-| `app-laravel` | `laravel-api` | `8000:8000` | Backend REST API (PHP 8.4 / Artisan) |
-| `mysql-server` | `MySQL-API` | `3306:3306` | Database MySQL 8.0 (DB: `API_ujikom`) |
-| `phpMyadmin` | `PhpMyadmin-API` | `8081:80` | GUI pengelolaan database |
+| `app` | `ujikom_app` | `8090:80` | Backend Laravel / Web App |
+| `db` | `ujikom_db` | `3309:3306` | Database MySQL 8.0 (DB: `ujikom_api`) |
+| `phpmyadmin` | `ujikom_phpmyadmin` | `8091:80` | GUI pengelolaan database |
 
 | Akses | Alamat |
 |---|---|
-| API | http://localhost:8000 |
-| phpMyAdmin | http://localhost:8081 |
+| Web App / API | http://localhost:8090 |
+| phpMyAdmin | http://localhost:8091 |
 
 **Kredensial database**
 
 | Key | Value |
 |---|---|
-| Database | `API_ujikom` |
-| Username | `api_ujikom` |
-| Password | `api_ujikom` |
-| Root password | `passwordroot` |
+| Database | `ujikom_api` |
+| Username | `root` |
+| Password | `root_password` |
+| Root password | `root_password` |
 
-> Saat `docker compose exec`, pakai **nama service** (`app-laravel`), bukan nama container (`laravel-api`).
+> Saat `docker compose exec`, pakai **nama service** (`app`), bukan nama container (`ujikom_app`).
 
 ---
 
@@ -73,7 +73,7 @@ sudo apt install php-cli php-mbstring php-xml php-curl php-zip php-mysql compose
 
 ```bash
 # 1. Generate key (tekan Enter 3x sampai selesai)
-ssh-keygen -t ed25519 -C "dafaxpplg3@gmail.com"
+ssh-keygen -t ed25519 -C "pasyha@gmail.com"
 
 # 2. Tampilkan public key, lalu salin seluruh isinya
 cat ~/.ssh/id_ed25519.pub
@@ -95,8 +95,8 @@ Semua perintah dijalankan di **terminal WSL Ubuntu**.
 ### 1. Clone repository
 
 ```bash
-git clone git@github.com:Dafa-Faturahman-shidiq/peminjaman-alat-api.git
-cd peminjaman-alat-api
+git clone git@github.com:SyaaKenpes/project-ujikom.git
+cd project-ujikom
 ```
 
 ### 2. Nyalakan container Docker
@@ -128,11 +128,11 @@ Buka `backend/.env` di VS Code dan **pastikan nilai berikut** (ganti baris yang 
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=mysql-server
+DB_HOST=db
 DB_PORT=3306
-DB_DATABASE=API_ujikom
-DB_USERNAME=api_ujikom
-DB_PASSWORD=api_ujikom
+DB_DATABASE=ujikom_api
+DB_USERNAME=root
+DB_PASSWORD=password
 
 SESSION_DRIVER=file
 ```
@@ -144,11 +144,11 @@ Opsional — otomatis lewat `sed` (jalankan di folder `backend`):
 
 ```bash
 sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-sed -i 's/^# *DB_HOST=.*/DB_HOST=mysql-server/' .env
+sed -i 's/^# *DB_HOST=.*/DB_HOST=db/' .env
 sed -i 's/^# *DB_PORT=.*/DB_PORT=3306/' .env
-sed -i 's/^# *DB_DATABASE=.*/DB_DATABASE=API_ujikom/' .env
-sed -i 's/^# *DB_USERNAME=.*/DB_USERNAME=api_ujikom/' .env
-sed -i 's/^# *DB_PASSWORD=.*/DB_PASSWORD=api_ujikom/' .env
+sed -i 's/^# *DB_DATABASE=.*/DB_DATABASE=ujikom_api/' .env
+sed -i 's/^# *DB_USERNAME=.*/DB_USERNAME=root/' .env
+sed -i 's/^# *DB_PASSWORD=.*/DB_PASSWORD=password/' .env
 sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env
 ```
 
@@ -172,31 +172,31 @@ docker compose exec app-laravel php artisan migrate --seed
 
 ### 7. Selesai — tes
 
-- API: http://localhost:8000
-- phpMyAdmin: http://localhost:8081 (user `api_ujikom` / pass `api_ujikom`)
-- Endpoint login: `POST http://localhost:8000/api/login`
+- Web App: http://localhost:8090
+- phpMyAdmin: http://localhost:8091 (user root / pass password)
+- Endpoint login: `POST http://localhost:8090/api/login`
 
 ---
 
 ## Urutan Cepat Hari H
 
 ```bash
-# 1. Clone
-git clone git@github.com:Dafa-Faturahman-shidiq/peminjaman-alat-api.git
+# 1. Clone & masuk folder
+git clone git@github.com:SyaaKenpes/project-ujikom.git && cd project-ujikom
 
 # 2. Docker
-cd peminjaman-alat-api && docker compose up -d
+docker compose up -d
 
-# 3. Dependensi & env
-cd backend && composer install && cp .env.example .env && php artisan key:generate
+# 3. Dependensi & env (jika belum ada .env)
+composer install && cp .env.example .env && php artisan key:generate
 
-# 4. Edit backend/.env  (DB_CONNECTION=mysql, DB_HOST=mysql-server, DB_DATABASE=API_ujikom,
-#    DB_USERNAME=api_ujikom, DB_PASSWORD=api_ujikom, SESSION_DRIVER=file)
-#    lalu beri izin:
-sudo chmod -R 777 storage bootstrap/cache
+# 4. Edit .env (DB_CONNECTION=mysql, DB_HOST=db, DB_DATABASE=ujikom_api, DB_USERNAME=user, DB_PASSWORD=password, SESSION_DRIVER=file)
+#    lalu beri izin permission & clear config:
+docker exec -u 0 -it ujikom_app chmod -R 777 storage bootstrap/cache public
+docker exec -it ujikom_app php artisan config:clear
 
 # 5. Migrasi
-cd .. && docker compose exec app-laravel php artisan migrate --seed
+docker exec -it ujikom_app php artisan migrate:fresh --seed
 ```
 
 ---
