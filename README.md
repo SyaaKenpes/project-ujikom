@@ -1,66 +1,247 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Peminjaman Alat API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API peminjaman alat berbasis **Laravel (PHP 8.4)** + **MySQL 8.0**, dijalankan dengan **Docker Compose**.
+Dibuat untuk keperluan Uji Kompetensi (UKOM) — Dafa Faturahman Shidiq.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Daftar Isi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. [Ringkasan Layanan](#ringkasan-layanan)
+2. [Prasyarat (sekali saja)](#prasyarat-sekali-saja)
+3. [Setup SSH Key GitHub (sekali saja)](#setup-ssh-key-github-sekali-saja)
+4. [Setup Project dari Nol](#setup-project-dari-nol)
+5. [Urutan Cepat Hari H](#urutan-cepat-hari-h)
+6. [Perintah Sehari-hari](#perintah-sehari-hari)
+7. [Troubleshooting](#troubleshooting)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Ringkasan Layanan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Service (`docker compose`) | Container | Port | Fungsi |
+|---|---|---|---|
+| `app-laravel` | `laravel-api` | `8000:8000` | Backend REST API (PHP 8.4 / Artisan) |
+| `mysql-server` | `MySQL-API` | `3306:3306` | Database MySQL 8.0 (DB: `API_ujikom`) |
+| `phpMyadmin` | `PhpMyadmin-API` | `8081:80` | GUI pengelolaan database |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Akses | Alamat |
+|---|---|
+| API | http://localhost:8000 |
+| phpMyAdmin | http://localhost:8081 |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Kredensial database**
 
-## Laravel Sponsors
+| Key | Value |
+|---|---|
+| Database | `API_ujikom` |
+| Username | `api_ujikom` |
+| Password | `api_ujikom` |
+| Root password | `passwordroot` |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+> Saat `docker compose exec`, pakai **nama service** (`app-laravel`), bukan nama container (`laravel-api`).
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Prasyarat (sekali saja)
 
-## Contributing
+### A. Di Windows
+Install: **Docker Desktop**, **VS Code** (+ ekstensi *WSL*), **Git**.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Buka **PowerShell (Run as Administrator)**:
 
-## Code of Conduct
+```powershell
+wsl --install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Restart komputer jika diminta, lalu buat user Ubuntu.
+Pastikan Docker Desktop: *Settings → Resources → WSL Integration* → aktifkan untuk **Ubuntu**.
 
-## Security Vulnerabilities
+### B. Di WSL Ubuntu
+Buka VS Code → klik pojok kiri bawah → **Connect to WSL (Ubuntu)** → buka terminal (`Ctrl + ~`):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+sudo apt update
+sudo apt install php-cli php-mbstring php-xml php-curl php-zip php-mysql composer git -y
+```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Setup SSH Key GitHub (sekali saja)
+
+> Key **harus dibuat di terminal WSL Ubuntu**, bukan di Git Bash Windows.
+
+```bash
+# 1. Generate key (tekan Enter 3x sampai selesai)
+ssh-keygen -t ed25519 -C "dafaxpplg3@gmail.com"
+
+# 2. Tampilkan public key, lalu salin seluruh isinya
+cat ~/.ssh/id_ed25519.pub
+```
+
+3. Buka GitHub → **Settings → SSH and GPG keys → New SSH key** → tempel → Save.
+4. Tes koneksi:
+
+```bash
+ssh -T git@github.com
+```
+
+---
+
+## Setup Project dari Nol
+
+Semua perintah dijalankan di **terminal WSL Ubuntu**.
+
+### 1. Clone repository
+
+```bash
+git clone git@github.com:Dafa-Faturahman-shidiq/peminjaman-alat-api.git
+cd peminjaman-alat-api
+```
+
+### 2. Nyalakan container Docker
+
+Dari folder utama project (yang ada `docker-compose.yml`):
+
+```bash
+docker compose up -d
+```
+
+Tunggu ±30 detik pada run pertama agar MySQL selesai inisialisasi. Cek status:
+
+```bash
+docker compose ps
+```
+
+### 3. Install dependensi & buat file `.env`
+
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+### 4. Atur `.env`
+
+Buka `backend/.env` di VS Code dan **pastikan nilai berikut** (ganti baris yang sudah ada):
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=mysql-server
+DB_PORT=3306
+DB_DATABASE=API_ujikom
+DB_USERNAME=api_ujikom
+DB_PASSWORD=api_ujikom
+
+SESSION_DRIVER=file
+```
+
+> `.env.example` bawaan memakai `DB_CONNECTION=sqlite` dan baris `DB_*` ter-comment (`#`).
+> Hapus tanda `#` dan ubah nilainya seperti di atas, kalau tidak migrasi tidak akan masuk ke MySQL.
+
+Opsional — otomatis lewat `sed` (jalankan di folder `backend`):
+
+```bash
+sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+sed -i 's/^# *DB_HOST=.*/DB_HOST=mysql-server/' .env
+sed -i 's/^# *DB_PORT=.*/DB_PORT=3306/' .env
+sed -i 's/^# *DB_DATABASE=.*/DB_DATABASE=API_ujikom/' .env
+sed -i 's/^# *DB_USERNAME=.*/DB_USERNAME=api_ujikom/' .env
+sed -i 's/^# *DB_PASSWORD=.*/DB_PASSWORD=api_ujikom/' .env
+sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env
+```
+
+### 5. Izin folder `storage` & `cache`
+
+Masih di folder `backend`:
+
+```bash
+sudo chmod -R 777 storage bootstrap/cache
+```
+
+### 6. Migrasi database + seeder
+
+Kembali ke folder utama, lalu jalankan lewat Docker:
+
+```bash
+cd ..
+docker compose exec app-laravel php artisan config:clear
+docker compose exec app-laravel php artisan migrate --seed
+```
+
+### 7. Selesai — tes
+
+- API: http://localhost:8000
+- phpMyAdmin: http://localhost:8081 (user `api_ujikom` / pass `api_ujikom`)
+- Endpoint login: `POST http://localhost:8000/api/login`
+
+---
+
+## Urutan Cepat Hari H
+
+```bash
+# 1. Clone
+git clone git@github.com:Dafa-Faturahman-shidiq/peminjaman-alat-api.git
+
+# 2. Docker
+cd peminjaman-alat-api && docker compose up -d
+
+# 3. Dependensi & env
+cd backend && composer install && cp .env.example .env && php artisan key:generate
+
+# 4. Edit backend/.env  (DB_CONNECTION=mysql, DB_HOST=mysql-server, DB_DATABASE=API_ujikom,
+#    DB_USERNAME=api_ujikom, DB_PASSWORD=api_ujikom, SESSION_DRIVER=file)
+#    lalu beri izin:
+sudo chmod -R 777 storage bootstrap/cache
+
+# 5. Migrasi
+cd .. && docker compose exec app-laravel php artisan migrate --seed
+```
+
+---
+
+## Perintah Sehari-hari
+
+```bash
+docker compose up -d                # nyalakan semua container
+docker compose down                 # matikan semua container
+docker compose down -v              # matikan + HAPUS data database (reset total)
+docker compose ps                   # lihat status container
+docker compose logs -f app-laravel  # lihat log Laravel
+
+# Artisan lewat Docker (dari folder utama)
+docker compose exec app-laravel php artisan migrate:fresh --seed
+docker compose exec app-laravel php artisan route:list
+docker compose exec app-laravel php artisan config:clear
+```
+
+---
+
+## Troubleshooting
+
+| Error | Penyebab | Solusi |
+|---|---|---|
+| `Permission denied (publickey)` | SSH key dibuat di Git Bash Windows, bukan WSL | Jalankan `ssh-keygen` di terminal WSL, daftarkan `id_ed25519.pub` ke GitHub |
+| `Could not open input file: artisan` | Terminal masih di folder utama | `cd backend` dulu sebelum `php artisan ...` |
+| `service "..." is not running` / `no such service` | Memakai nama container, bukan nama service | Pakai `app-laravel` dari folder utama: `docker compose exec app-laravel ...` |
+| `Permission denied` pada `laravel.log` | WSL tidak punya izin tulis di folder log | `sudo chmod -R 777 backend/storage backend/bootstrap/cache` |
+| `Table 'sessions' doesn't exist` | `SESSION_DRIVER=database` sebelum migrasi | Ubah ke `SESSION_DRIVER=file`, lalu `docker compose exec app-laravel php artisan config:clear` |
+| `Connection refused` / `SQLSTATE[HY000] [2002]` saat migrasi | MySQL belum siap atau `DB_HOST` salah | Tunggu ±30 detik, pastikan `DB_HOST=mysql-server` (bukan `127.0.0.1`), ulangi migrasi |
+| Migrasi memakai SQLite, bukan MySQL | `DB_CONNECTION` masih `sqlite` | Set `DB_CONNECTION=mysql` dan hapus `#` pada baris `DB_*` di `.env` |
+| Download image Docker timeout | Koneksi WSL ke registry lambat/putus | Ulangi `docker compose up -d`, atau set DNS: `sudo sh -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'` |
+| `docker: command not found` di WSL | Integrasi WSL Docker Desktop belum aktif | Docker Desktop → Settings → Resources → WSL Integration → aktifkan Ubuntu |
+
+---
+
+## Struktur Project
+
+```
+peminjaman-alat-api/
+├── docker-compose.yml   # 3 service: mysql-server, app-laravel, phpMyadmin
+└── backend/             # Aplikasi Laravel (API)
+    ├── Dockerfile       # php:8.4-cli + pdo_mysql + composer
+    ├── app/
+    ├── database/        # migrations & seeders
+    └── routes/api.php   # endpoint API (login, katalog, peminjaman, dll.)
+```
