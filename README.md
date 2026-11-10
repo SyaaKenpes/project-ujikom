@@ -35,8 +35,8 @@ Dibuat untuk keperluan Uji Kompetensi (UKOM) — Pasyha Zulfahmi Rochmat.
 | Key | Value |
 |---|---|
 | Database | `ujikom_api` |
-| Username | `root` |
-| Password | `root_password` |
+| Username | `user` |
+| Password | `password` |
 | Root password | `root_password` |
 
 > Saat `docker compose exec`, pakai **nama service** (`app`), bukan nama container (`ujikom_app`).
