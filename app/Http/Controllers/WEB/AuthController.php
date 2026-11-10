@@ -87,26 +87,33 @@ class AuthController extends Controller
 
     // Memproses data register
     public function storeRegister(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'no_hp'    => 'required|string|max:15',
-            'alamat'   => 'required|string',
-        ]);
+{
+    // Validasi dengan custom message
+    $request->validate([
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        'no_hp'    => 'required|string|max:15',
+        'alamat'   => 'required|string',
+    ], [
+        // Kustomisasi pesan error
+        'email.unique' => 'Email ini sudah terdaftar, silakan gunakan email lain atau langsung login!',
+        'email.email'  => 'Format email tidak valid!',
+        'password.min' => 'Password minimal harus 6 karakter!',
+        'password.confirmed' => 'Konfirmasi password tidak cocok!',
+    ]);
 
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'peminjam', // Otomatis dikunci jadi peminjam
-            'no_hp'    => $request->no_hp,
-            'alamat'   => $request->alamat,
-        ]);
+    User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        'role'     => 'peminjam',
+        'no_hp'    => $request->no_hp,
+        'alamat'   => $request->alamat,
+    ]);
 
-        return redirect('/login')->with('success', 'Registrasi berhasil, silakan login!');
-    }
+    return redirect('/login')->with('success', 'Registrasi berhasil, silakan login!');
+}
 
     // Proses Logout
     public function logout(Request $request)

@@ -34,7 +34,7 @@
 
     <!-- Overlay Gelap pada Background -->
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-    
+
     <!-- Spacer Atas -->
     <div></div>
 
@@ -85,6 +85,13 @@
                             class="w-full px-3 py-2 bg-white/90 text-gray-900 placeholder-gray-500 text-sm rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-inner">
                     </div>
 
+                    <!-- Input Konfirmasi Password -->
+                    <div>
+                        <label class="block text-xs font-medium mb-1 text-gray-200">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" required placeholder="••••••••••••"
+                            class="w-full px-3 py-2 bg-white/90 text-gray-900 placeholder-gray-500 text-sm rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-inner">
+                    </div>
+
                     <!-- Input No HP -->
                     <div>
                         <label class="block text-xs font-medium mb-1 text-gray-200">No HP / WhatsApp</label>
@@ -110,7 +117,8 @@
 
             <div class="mt-6 text-center text-xs">
                 <p class="text-gray-300">Sudah punya akun?</p>
-                <a href="{{ route('login') }}" class="text-sky-300 hover:text-sky-200 font-medium transition underline">Login di sini</a>
+                <a href="{{ route('login') }}"
+                    class="text-sky-300 hover:text-sky-200 font-medium transition underline">Login di sini</a>
             </div>
         </div>
 

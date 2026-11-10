@@ -7,18 +7,27 @@ use App\Http\Controllers\WEB\PeminjamController;
 use App\Http\Controllers\WEB\AuthController;
 use App\Http\Controllers\WEB\ProfileController;
 use App\Http\Controllers\WEB\PengembalianController;
+use App\Http\Controllers\WEB\ProfileController;
 
 
 Route::get('/', function () {
     return view('login');
 });
 
+// Register
 Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
 Route::post('/register', [AuthController::class, 'storeRegister']);
 
+<<<<<<< HEAD
 // Rute Profil
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+=======
+
+// Rute Profil
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+>>>>>>> 2922a19 (profile-update)
     Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
