@@ -7,30 +7,37 @@ use App\Http\Controllers\WEB\PeminjamController;
 use App\Http\Controllers\WEB\AuthController;
 use App\Http\Controllers\WEB\ProfileController;
 use App\Http\Controllers\WEB\PengembalianController;
-use App\Http\Controllers\WEB\ProfileController;
 
-
+// ==========================================
+// PUBLIC & AUTH ROUTES
+// ==========================================
 Route::get('/', function () {
     return view('login');
 });
 
-// Register
-Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
-Route::post('/register', [AuthController::class, 'storeRegister']);
+// Route Tamu (Belum Login)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
-<<<<<<< HEAD
-// Rute Profil
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-=======
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
+    Route::post('/register', [AuthController::class, 'storeRegister']);
+});
 
-// Rute Profil
+// Route Logout (Harus sudah login)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+
+// ==========================================
+// GLOBAL USER PROFILE ROUTES (Semua Role Bisa Akses)
+// ==========================================
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
->>>>>>> 2922a19 (profile-update)
     Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
+
 
 // ==========================================
 // ADMIN ROUTES
@@ -78,10 +85,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/history', [PengembalianController::class, 'history'])->name('history');
 }); 
 
+
 // ==========================================
 // PETUGAS ROUTES
 // ==========================================
-// petugas
 Route::middleware(['auth', 'role:petugas,admin'])->prefix('petugas')->name('petugas.')->group(function () {
     // Peminjaman & Persetujuan
     Route::get('/peminjaman', [PetugasController::class, 'indexPeminjaman'])->name('peminjaman.index');
@@ -99,6 +106,7 @@ Route::middleware(['auth', 'role:petugas,admin'])->prefix('petugas')->name('petu
     Route::get('/pengembalian/{id}/proses', [PetugasController::class, 'formPengembalian'])->name('pengembalian.form');
 });
 
+
 // ==========================================
 // PEMINJAM ROUTES
 // ==========================================
@@ -107,20 +115,4 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
     Route::get('/katalog', [PeminjamController::class, 'indexKatalog'])->name('katalog.index');
     Route::post('/peminjaman', [PeminjamController::class, 'storePengajuan'])->name('peminjaman.store');
     Route::get('/riwayat', [PeminjamController::class, 'indexRiwayat'])->name('riwayat.index');
-
-    
 });
-
-// ==========================================
-// AUTH ROUTES
-// ==========================================
-// Route Tamu (Belum Login)
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-});
-
-// Route Logout (Harus sudah login)
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
-
-

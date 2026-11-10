@@ -40,13 +40,16 @@
                 </div>
 
                 <nav class="p-4 space-y-3">
-<<<<<<< HEAD
+
                     <!-- Tombol Profil (Universal untuk semua role, ditaruh di paling atas sebelum menu utama) -->
                     <a href="{{ route('profile') }}"
-=======
+
                     <!-- Tombol Profil -->
                     <a href="{{ route('profile.index') }}"
->>>>>>> 2922a19 (profile-update)
+
+
+                    <!-- Tombol Profil -->
+                    <a href="{{ route('profile.index') }}"
                         class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('profile.*') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
                         
                         <!-- Logika Icon Profil: Jika ada foto tampilkan foto, jika tidak tampilkan SVG bawaan -->
@@ -196,10 +199,7 @@
                 </nav>
             </div>
 
-<<<<<<< HEAD
             <!-- Bagian Bawah dikosongkan (Logged in as sudah dihapus) -->
-=======
->>>>>>> 2922a19 (profile-update)
             <div class="p-4 border-t border-gray-800 text-xs text-gray-500 text-center">
                 GearHub V1.0
             </div>
