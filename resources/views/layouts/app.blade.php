@@ -40,6 +40,25 @@
                 </div>
 
                 <nav class="p-4 space-y-3">
+                    <!-- Tombol Profil (Universal untuk semua role, ditaruh di paling atas sebelum menu utama) -->
+                    <a href="{{ route('profile') }}"
+                        class="group flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-300 ease-out {{ request()->routeIs('profile.*') ? 'bg-slate-800 border-l-4 border-blue-500 text-white font-semibold shadow-md translate-x-1' : 'text-gray-400 hover:bg-slate-800/60 hover:text-white hover:translate-x-2' }}">
+                        
+                        <!-- Logika Icon Profil: Jika ada foto tampilkan foto, jika tidak tampilkan SVG bawaan -->
+                        @if (auth()->user()->foto_profile)
+                            <img src="{{ asset('images/profiles/' . auth()->user()->foto_profile) }}" alt="Foto" class="w-5 h-5 rounded-full object-cover transition-transform duration-300 group-hover:scale-110">
+                        @else
+                            <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        @endif
+                        Profil Saya
+                    </a>
+
+                    <hr class="border-gray-800 my-2">
+
                     <!-- Menu khusus admin -->
                     @if (auth()->user()->role === 'admin')
                         <!-- Dashboard -->
@@ -172,9 +191,9 @@
                 </nav>
             </div>
 
-            <!-- Bagian Bawah: Logged In Status -->
-            <div class="p-4 border-t border-gray-800 text-xs text-gray-400">
-                Logged in as: <span class="text-white font-semibold">{{ auth()->user()->name ?? 'User' }}</span>
+            <!-- Bagian Bawah dikosongkan (Logged in as sudah dihapus) -->
+            <div class="p-4 border-t border-gray-800 text-xs text-gray-500 text-center">
+                GearHub V1.0
             </div>
         </aside>
 

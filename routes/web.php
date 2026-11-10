@@ -5,6 +5,7 @@ use App\Http\Controllers\WEB\AdminController;
 use App\Http\Controllers\WEB\PetugasController;
 use App\Http\Controllers\WEB\PeminjamController; 
 use App\Http\Controllers\WEB\AuthController;
+use App\Http\Controllers\WEB\ProfileController;
 use App\Http\Controllers\WEB\PengembalianController;
 
 
@@ -14,6 +15,13 @@ Route::get('/', function () {
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
 Route::post('/register', [AuthController::class, 'storeRegister']);
+
+// Rute Profil
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+});
 
 // ==========================================
 // ADMIN ROUTES
