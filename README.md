@@ -180,6 +180,21 @@ docker compose exec app-laravel php artisan migrate --seed
 
 ## Urutan Cepat Hari H
 
+## 📁 Penyimpanan Proyek ke Dalam Lingkungan WSL Ubuntu
+
+Langkah awal ini memastikan bahwa seluruh berkas proyek terunduh dan dikelola secara langsung di dalam sistem berkas WSL Ubuntu, sehingga performa akses berkas menjadi lebih optimal.
+
+### 1. Membuka Lingkungan WSL di Visual Studio Code
+* Buka aplikasi Visual Studio Code pada komputer laboratorium.
+* Pastikan indikator status di pojok kiri bawah jendela editor telah menunjukkan keterangan **`WSL: Ubuntu`**.
+
+### 2. Mengunduh Repositori Proyek
+* Buka terminal terintegrasi pada Visual Studio Code (`Ctrl + ~`).
+* Pastikan posisi direktori aktif berada pada direktori *home* pengguna Linux (ditandai dengan simbol `~` atau jalur `/home/username`).
+* Jalankan perintah penarikan repositori (*git clone*) berikut:
+  ```bash
+  git clone [https://github.com/SyaaKenpes/project-ujikom.git](https://github.com/SyaaKenpes/project-ujikom.git)
+
 ```bash
 # 1. Clone & masuk folder
 git clone git@github.com:SyaaKenpes/project-ujikom.git && cd project-ujikom
