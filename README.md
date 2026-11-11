@@ -232,6 +232,17 @@ docker compose exec app-laravel php artisan config:clear
 | Download image Docker timeout | Koneksi WSL ke registry lambat/putus | Ulangi `docker compose up -d`, atau set DNS: `sudo sh -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'` |
 | `docker: command not found` di WSL | Integrasi WSL Docker Desktop belum aktif | Docker Desktop → Settings → Resources → WSL Integration → aktifkan Ubuntu |
 
+
+### Git Troubleshooting
+
+| Error | Penyebab | Solusi |
+| :--- | :--- | :--- |
+| `error: failed to push some refs` / `Updates were rejected` | Repository di GitHub memiliki commit baru yang belum ada di komputer lokal. | Jalankan `git pull origin main --rebase` lalu `git push origin main`. |
+| `CONFLICT (content): Merge conflict` | Baris kode yang sama diubah secara bersamaan di lokal dan GitHub. | Buka file yang konflik, hapus penanda `<<<<<<<`, `=======`, `>>>>>>>`, lalu `git add .` dan `git rebase --continue`. |
+| `error: you have staged changes in your working tree` | Ada perubahan yang sudah di-`git add` tetapi proses *rebase* tertunda dan meminta konfirmasi *commit*. | Jalankan `git commit -m "pesan commit"` lalu `git rebase --continue`. |
+| `Permission denied` / `unable to create file ...` saat operasi Git | Folder atau file project terkunci atau menjadi milik `root` akibat penggunaan `sudo` sebelumnya. | Jalankan `sudo chown -R $USER:$USER .` di terminal untuk mengembalikan hak akses ke user aktif. |
+| `fatal: You are not currently on a branch` (Detached HEAD) | Status Git tersangkut di tengah proses *rebase* yang belum tuntas. | Selesaikan masalah/konflik, lalu jalankan `git rebase --continue` (atau batalkan dengan `git rebase --abort`). |
+
 ---
 
 ## Struktur Project
