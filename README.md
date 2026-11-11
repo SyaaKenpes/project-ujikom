@@ -222,7 +222,7 @@ docker compose exec app-laravel php artisan config:clear
 
 | Error | Penyebab | Solusi |
 |---|---|---|
-| `Permission denied (publickey)` | SSH key dibuat di Git Bash Windows, bukan WSL | Jalankan `ssh-keygen` di terminal WSL, daftarkan `id_ed25519.pub` ke GitHub |
+| `Permission denied (publickey)` | SSH key dibuat di Git Bash Windows, bukan WSL | Jalankan `ssh-keygen` di terminal WSL, daftarkan `id_ed25519.pub` ke GitHub, atau jalankan perintah `sudo chown -R $USER:$USER .` |
 | `Could not open input file: artisan` | Terminal masih di folder utama | `cd backend` dulu sebelum `php artisan ...` |
 | `service "..." is not running` / `no such service` | Memakai nama container, bukan nama service | Pakai `app-laravel` dari folder utama: `docker compose exec app-laravel ...` |
 | `Permission denied` pada `laravel.log` | WSL tidak punya izin tulis di folder log | `sudo chmod -R 777 backend/storage backend/bootstrap/cache` |
