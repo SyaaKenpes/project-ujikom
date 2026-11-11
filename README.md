@@ -95,7 +95,7 @@ Semua perintah dijalankan di **terminal WSL Ubuntu**.
 ### 1. Clone repository
 
 ```bash
-git clone git@github.com:SyaaKenpes/project-ujikom.git
+git clone git clone https://github.com/SyaaKenpes/project-ujikom.git
 cd project-ujikom
 ```
 
